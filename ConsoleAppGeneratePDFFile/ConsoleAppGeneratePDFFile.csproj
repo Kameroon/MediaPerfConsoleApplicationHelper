@@ -72,6 +72,8 @@
   <ItemGroup>
     <Compile Include="Author.cs" />
     <Compile Include="DataTableHelper.cs" />
+    <Compile Include="ExcelService\ExcelHelper.cs" />
+    <Compile Include="ITextEvents.cs" />
     <Compile Include="MailService\IEmailMessage.cs" />
     <Compile Include="MailService\MailConsolidateHelper.cs" />
     <Compile Include="MailService\SendEmailService.cs" />

@@ -1,9 +1,11 @@
 ﻿using iTextSharp.text;
+using iTextSharp.text.pdf;
 using MigraDoc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,20 +36,81 @@ namespace ConsoleAppGeneratePDFFile
             string pdfPath = @"C:\Users\Sweet Family\Desktop\PdfFilesPath";
 
 
-            CreatePDF();
+            CreatePDFTutorial();
 
-            PDFHelper.CreatePDF(dateTable, pdfPath);
+            //// -- !!!!! --
+            //PDFHelper.AddImage(2);
+
+            //CreatePDF(pdfPath);
+
+            //PDFHelper.CreatePDF(dateTable, pdfPath);
 
 
             Console.WriteLine("");
         }
 
+        private static void CreatePDFTutorial()
+        {
+            string fileName = string.Empty;
 
-        private static void CreatePDF()
+            DateTime fileCreationDatetime = DateTime.Now;
+
+            fileName = string.Format("{0}.pdf", 
+                fileCreationDatetime.ToString(@"yyyyMMdd") + "_" + fileCreationDatetime.ToString(@"HHmmss"));
+
+            //string pdfPath = Server.MapPath(@"~\PDFs\") + fileName;
+            string pdfPath = fileName;
+
+            using (FileStream msReport = new FileStream(pdfPath, FileMode.Create))
+            {
+                //step 1
+                using (Document pdfDoc = new Document(PageSize.A4, 10f, 10f, 140f, 10f))
+                {
+                    try
+                    {
+                        // step 2
+                        PdfWriter pdfWriter = PdfWriter.GetInstance(pdfDoc, msReport);
+                        //pdfWriter.PageEvent = new Common.ITextEvents();
+
+                        //open the stream
+                        pdfDoc.Open();
+
+                        for (int i = 0; i < 10; i++)
+                        {
+                            Paragraph para = new Paragraph("Hello world. Checking Header Footer",
+                                new Font(Font.FontFamily.HELVETICA, 22));
+
+                            para.Alignment = Element.ALIGN_CENTER;
+
+                            pdfDoc.Add(para);
+
+                            pdfDoc.NewPage();
+                        }
+
+                        pdfDoc.Close();
+
+                    }
+                    catch (Exception ex)
+                    {
+                        //handle exception
+                    }
+
+                    finally
+                    {
+
+                    }
+                }
+            }
+        }
+
+
+        private static void CreatePDF(string path)
         {
             try
             {
-                PDFManager pdfManager = new PDFManager(GetTable(), @"C:\Users\Sweet Family\Desktop\imgDrole.png");
+                string imgUrl = @"C:\Users\Sweet Family\Desktop\imgDrole.png";
+                                
+                PDFManager pdfManager = new PDFManager(GetTable(), imgUrl);
 
                 // Create a MigraDoc document
                 var document = pdfManager.CreateDocument();
@@ -76,6 +139,9 @@ namespace ConsoleAppGeneratePDFFile
                 filename = "Invoice-" + Guid.NewGuid().ToString("N").ToUpper() + ".pdf";
 #endif
                 pdfRenderer.Save(filename);
+
+                //File.WriteAllText("your file path here", bytes);
+
                 // ...and start a viewer.
                 Process.Start(filename);
             }
