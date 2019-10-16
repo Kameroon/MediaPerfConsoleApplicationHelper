@@ -19,15 +19,15 @@ namespace ConsoleAppGeneratePDFFile
 
             var authors = GetAuthors();
 
-            foreach (var author in authors)
-            {
-                Console.WriteLine("Author: {0},{1},{2},{3},{4}", 
-                    author.Name, 
-                    author.Age, 
-                    author.BookTitle, 
-                    author.IsMVP,
-                    author.PublishedDate);
-            }
+            //foreach (var author in authors)
+            //{
+            //    Console.WriteLine("Author: {0},{1},{2},{3},{4}", 
+            //        author.Name, 
+            //        author.Age, 
+            //        author.BookTitle, 
+            //        author.IsMVP,
+            //        author.PublishedDate);
+            //}
 
             var dateTable = DataTableHelper.ToDataTable<Author>(authors);
 
@@ -36,7 +36,22 @@ namespace ConsoleAppGeneratePDFFile
             string pdfPath = @"C:\Users\Sweet Family\Desktop\PdfFilesPath";
 
 
-            CreatePDFTutorial();
+            string _imagePath = "https://ftp.mediaperf.com/img/logo.gif";
+            //PDFManagerV1.CreatePdf4(pdfPath, _imagePath);
+
+            PDFManagerV1.ADDPdf(pdfPath);
+
+            ////CustomReports customReports = new CustomReports();
+            ////customReports.CreatePDF("45555555555555555555555555");
+
+            //PDFManagerV1.CreatePDF(dateTable, pdfPath);
+
+            //GeneratePDF(pdfPath);
+
+            ;
+            //GeneratePDFFile(pdfPath);
+
+            //CreatePDFTutorial();
 
             //// -- !!!!! --
             //PDFHelper.AddImage(2);
@@ -45,8 +60,289 @@ namespace ConsoleAppGeneratePDFFile
 
             //PDFHelper.CreatePDF(dateTable, pdfPath);
 
+            #region MyRegion.
+            /*
+            string filePath = pdfPath + "\\SpacingTest.pdf";
+            using (FileStream fs = new FileStream(filePath, FileMode.Create))
+            {
+
+                Document doc = new Document();
+                PdfWriter.GetInstance(doc, fs);
+                doc.Open();
+
+                Paragraph paragraphTable1 = new Paragraph();
+                paragraphTable1.SpacingAfter = 15f;
+
+                PdfPTable table = new PdfPTable(3);
+                PdfPCell cell = new PdfPCell(new Phrase("This is table 1"));
+                cell.Colspan = 3;
+                cell.HorizontalAlignment = 1;
+                table.AddCell(cell);
+                table.AddCell("Col 1 Row 1");
+                table.AddCell("Col 2 Row 1");
+                table.AddCell("Col 3 Row 1");
+                //table.AddCell("Col 1 Row 2"); 
+                //table.AddCell("Col 2 Row 2"); 
+                //table.AddCell("Col 3 Row 2"); 
+                paragraphTable1.Add(table);
+                doc.Add(paragraphTable1);
+
+                Paragraph paragraphTable2 = new Paragraph();
+                paragraphTable2.SpacingAfter = 10f;
+
+                table = new PdfPTable(3);
+                cell = new PdfPCell(new Phrase("This is table 2"));
+                cell.Colspan = 3;
+                cell.HorizontalAlignment = 1;
+                table.AddCell(cell);
+                table.AddCell("Col 1 Row 1");
+                table.AddCell("Col 2 Row 1");
+                table.AddCell("Col 3 Row 1");
+                table.AddCell("Col 1 Row 2");
+                table.AddCell("Col 2 Row 2");
+                table.AddCell("Col 3 Row 2");
+                paragraphTable2.Add(table);
+                doc.Add(paragraphTable2);
+                doc.Close();
+            }
+
+            // ...and start a viewer.
+            Process.Start(filePath);
+            */
+            #endregion
 
             Console.WriteLine("");
+        }
+
+
+
+        private static PdfPCell GetCell(string text)
+        {
+            return GetCell(text, 1, 1);
+        }
+
+        private static PdfPCell GetCell(string text, int colSpan, int rowSpan)
+        {
+            PdfPCell cell = new PdfPCell(new Phrase(text));
+            cell.HorizontalAlignment = 1;
+            cell.Rowspan = rowSpan;
+            cell.Colspan = colSpan;
+
+            return cell;
+        }
+        
+        private static void GeneratePDF(string path)
+        {
+            //string imgUrl = @"C:\Users\Sweet Family\Desktop\imgDrole.png";
+            string imgUrl = @"C:\Users\Sweet Family\Desktop\logo.jpg";
+
+            string filePath = path + "\\TESTPDF1.pdf";
+
+            var output = new FileStream(filePath, FileMode.Create);
+
+            using (Document document = new Document(PageSize.A4, 10, 10, 42, 35))
+            using(var writer = PdfWriter.GetInstance(document, output))
+            {
+                document.Open();
+
+                // -- Add logo à gauche --
+                var logo = Image.GetInstance(imgUrl);
+                logo.SetAbsolutePosition(20, 770);
+                logo.ScaleAbsoluteHeight(50);
+                logo.ScaleAbsoluteWidth(90);
+                document.Add(logo);
+
+                // -- Add logo à droite --
+                var logo10 = Image.GetInstance(imgUrl);
+                logo10.SetAbsolutePosition(490, 770);
+                logo10.ScaleAbsoluteHeight(50);
+                logo10.ScaleAbsoluteWidth(90);
+                document.Add(logo10);
+
+                Paragraph paragraphTable1 = new Paragraph();
+                paragraphTable1.SpacingAfter = 15f;
+
+                var titleFont = new Font(Font.FontFamily.UNDEFINED, 24);
+                var subTitleFont = new Font(Font.FontFamily.UNDEFINED, 16);
+                
+                PdfPTable table0 = new PdfPTable(2);
+                PdfContentByte cb = writer.DirectContent;
+                table0 = new PdfPTable(1);
+                table0.TotalWidth = 140;
+                table0.AddCell("TEST GAUCHE");
+                table0.WriteSelectedRows(0, -1, 35, 650, cb);
+                
+                PdfPTable table10 = new PdfPTable(2);
+                table10 = new PdfPTable(1);
+                table10.TotalWidth = 150;
+                table10.AddCell("TEST CENTRE");
+                table10.WriteSelectedRows(0, -1, 220, 650, cb);
+
+
+                PdfPTable table30 = new PdfPTable(2);
+                table30 = new PdfPTable(1);
+                table30.TotalWidth = 140;
+                table30.AddCell("TEST DROITE");
+                table30.WriteSelectedRows(0, -1, 400, 650, cb);
+
+
+
+                PdfPTable table1 = new PdfPTable(2);
+                table1.DefaultCell.Border = 0;
+                table1.WidthPercentage = 30;
+                //table1.WriteSelectedRows(0, -1, 300, 300, pcb);
+
+                Paragraph paragraphTable20 = new Paragraph();
+                paragraphTable20.SpacingBefore = 25f;
+
+
+                //PdfPCell cell11 = new PdfPCell();
+                // cell11.Colspan = 2;
+                // cell11.AddElement(new Paragraph("ABC Traders Receipt", titleFont));
+                // cell11.AddElement(new Paragraph("Thankyou for shoping at ABC traders,your order details are below",
+                //     subTitleFont));
+
+                // cell11.VerticalAlignment = Element.ALIGN_LEFT;
+                // table1.AddCell(cell11);
+
+                //paragraphTable1.Add(table1);
+                //document.Add(paragraphTable1);
+
+                PdfPCell cell12 = new PdfPCell();
+                 //cell12.VerticalAlignment = Element.ALIGN_CENTER;
+                 //table1.AddCell(cell11);
+                 //table1.AddCell(cell12);
+                 
+
+                Paragraph paragraphTable2 = new Paragraph();
+                paragraphTable2.SpacingAfter = 15f;
+
+                PdfContentByte pcb = writer.DirectContent;
+                PdfPTable table = new PdfPTable(9);
+                table.TotalWidth = 595;
+
+                // there isn't any content in the table: there's nothing to write yet
+
+                // Header row.
+                table.AddCell(GetCell("Header 1", 1, 2));
+                table.AddCell(GetCell("Header 2", 1, 2));
+                table.AddCell(GetCell("Header 3", 5, 1));
+                table.AddCell(GetCell("Header 4", 1, 2));
+                table.AddCell(GetCell("Header 5", 1, 2));
+
+                // Inner middle row.
+                table.AddCell(GetCell("H1"));
+                table.AddCell(GetCell("H2"));
+                table.AddCell(GetCell("H3"));
+                table.AddCell(GetCell("H4"));
+                table.AddCell(GetCell("H5"));
+
+                //paragraphTable2.Add(table);
+
+                table.WriteSelectedRows(0, 580, 10, 350, pcb);
+
+                document.Add(paragraphTable2);
+
+
+
+                document.Close();
+                writer.Close();
+            }
+                
+            
+            // ...and start a viewer.
+            Process.Start(filePath);
+        }
+
+        private static void GeneratePDFFile(string pdfPath)
+        {
+            string imgUrl = @"C:\Users\Sweet Family\Desktop\imgDrole.png";
+
+            string filePath = pdfPath + "\\TESTPDF.pdf";
+
+            Document doc = new Document(PageSize.A4);
+            var output = new FileStream(filePath, FileMode.Create);
+            var writer = PdfWriter.GetInstance(doc, output);
+            
+            doc.Open();
+
+            var logo = Image.GetInstance(imgUrl);
+            logo.SetAbsolutePosition(430, 770);
+            logo.ScaleAbsoluteHeight(30);
+            logo.ScaleAbsoluteWidth(70);
+            doc.Add(logo);
+
+            PdfPTable table1 = new PdfPTable(2);
+            table1.DefaultCell.Border = 0;
+            table1.WidthPercentage = 80;
+
+            var titleFont = new Font(Font.FontFamily.UNDEFINED, 24);
+            var subTitleFont = new Font(Font.FontFamily.UNDEFINED, 16);
+
+            PdfPCell cell11 = new PdfPCell();
+            cell11.Colspan = 1;
+            cell11.AddElement(new Paragraph("ABC Traders Receipt", titleFont));
+
+            cell11.AddElement(new Paragraph("Thankyou for shoping at ABC traders,your order details are below",
+                subTitleFont));
+            
+            cell11.VerticalAlignment = Element.ALIGN_LEFT;
+            PdfPCell cell12 = new PdfPCell();
+            cell12.VerticalAlignment = Element.ALIGN_CENTER;
+            table1.AddCell(cell11);
+            table1.AddCell(cell12);
+            
+            PdfPTable table2 = new PdfPTable(3);
+            //One row added
+            PdfPCell cell21 = new PdfPCell();
+            cell21.AddElement(new Paragraph("Photo Type"));
+            PdfPCell cell22 = new PdfPCell();
+            cell22.AddElement(new Paragraph("No. of Copies"));
+            PdfPCell cell23 = new PdfPCell();
+            cell23.AddElement(new Paragraph("Amount"));
+
+            table2.AddCell(cell21);
+            table2.AddCell(cell22);
+            table2.AddCell(cell23);
+
+            //New Row Added
+            PdfPCell cell31 = new PdfPCell();
+            cell31.AddElement(new Paragraph("Safe"));
+            cell31.FixedHeight = 300.0f;
+            PdfPCell cell32 = new PdfPCell();
+            cell32.AddElement(new Paragraph("2"));
+            cell32.FixedHeight = 300.0f;
+            PdfPCell cell33 = new PdfPCell();
+            cell33.AddElement(new Paragraph("20.00 * " + "2" + " = " + (20 * Convert.ToInt32("2")) + ".00"));
+
+            cell33.FixedHeight = 300.0f;
+
+            table2.AddCell(cell31);
+            table2.AddCell(cell32);
+            table2.AddCell(cell33);
+
+            PdfPCell cell2A = new PdfPCell(table2);
+            cell2A.Colspan = 2;
+            table1.AddCell(cell2A);
+
+            PdfPCell cell41 = new PdfPCell();
+            cell41.AddElement(new Paragraph("Name : " + "ABC"));
+            cell41.AddElement(new Paragraph("Advance : " + "advance"));
+            cell41.VerticalAlignment = Element.ALIGN_LEFT;
+
+            PdfPCell cell42 = new PdfPCell();
+            cell42.AddElement(new Paragraph("Customer ID : " + "011"));
+            cell42.AddElement(new Paragraph("Balance : " + "3993"));
+            cell42.VerticalAlignment = Element.ALIGN_RIGHT;
+                       
+            table1.AddCell(cell41);
+            table1.AddCell(cell42);
+
+            doc.Add(table1);
+            doc.Close();
+
+            // ...and start a viewer.
+            Process.Start(filePath);
         }
 
         private static void CreatePDFTutorial()

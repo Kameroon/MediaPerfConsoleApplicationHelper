@@ -80,6 +80,7 @@
     <Compile Include="MailService\Supplier.cs" />
     <Compile Include="PDFHelper.cs" />
     <Compile Include="PDFManager.cs" />
+    <Compile Include="PDFManagerV1.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

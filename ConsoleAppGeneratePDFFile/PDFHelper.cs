@@ -50,7 +50,7 @@ namespace ConsoleAppGeneratePDFFile
 
                         cell.HorizontalAlignment = PdfPCell.ALIGN_CENTER;
                         cell.VerticalAlignment = PdfPCell.ALIGN_CENTER;
-                        cell.BackgroundColor = new iTextSharp.text.BaseColor(51, 102, 102);
+                        cell.BackgroundColor = new BaseColor(51, 102, 102);
 
                         table.AddCell(cell);
                     }
