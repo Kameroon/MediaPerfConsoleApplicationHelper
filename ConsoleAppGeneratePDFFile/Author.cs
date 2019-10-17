@@ -9,12 +9,12 @@ namespace ConsoleAppGeneratePDFFile
     public class Author
     {
         private string name;
-        private short age;
+        private int age;
         private string title;
         private bool mvp;
         private DateTime pubdate;
 
-        public Author(string name, short age, string title, bool mvp, DateTime pubdate)
+        public Author(string name, int age, string title, bool mvp, DateTime pubdate)
         {
             this.name = name;
             this.age = age;
@@ -29,7 +29,7 @@ namespace ConsoleAppGeneratePDFFile
             set { name = value; }
         }
 
-        public short Age
+        public int Age
         {
             get { return age; }
             set { age = value; }

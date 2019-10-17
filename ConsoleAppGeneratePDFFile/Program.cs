@@ -39,7 +39,11 @@ namespace ConsoleAppGeneratePDFFile
             string _imagePath = "https://ftp.mediaperf.com/img/logo.gif";
             //PDFManagerV1.CreatePdf4(pdfPath, _imagePath);
 
-            PDFManagerV1.ADDPdf(pdfPath);
+
+            ////  - ************************************* -
+            //PDFManagerV1.ADDPdf(pdfPath);
+
+            Manager.CreatePDF(dateTable, pdfPath);
 
             ////CustomReports customReports = new CustomReports();
             ////customReports.CreatePDF("45555555555555555555555555");

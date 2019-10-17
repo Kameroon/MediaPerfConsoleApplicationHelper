@@ -78,11 +78,13 @@
     <Compile Include="MailService\MailConsolidateHelper.cs" />
     <Compile Include="MailService\SendEmailService.cs" />
     <Compile Include="MailService\Supplier.cs" />
+    <Compile Include="Manager.cs" />
     <Compile Include="PDFHelper.cs" />
     <Compile Include="PDFManager.cs" />
     <Compile Include="PDFManagerV1.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Report.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
