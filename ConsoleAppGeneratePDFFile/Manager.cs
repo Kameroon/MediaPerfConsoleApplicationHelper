@@ -873,7 +873,7 @@ namespace ConsoleAppGeneratePDFFile
                     table0 = new PdfPTable(1);
                     table0.TotalWidth = 160;
                     table0.AddCell(pdfPCell);
-                    table0.WriteSelectedRows(0, -1, 20, 650, cb);
+                    table0.WriteSelectedRows(0, -1, 20, 675, cb);
 
                     pdfPCell = new PdfPCell(new Phrase($"Date       { _report.CurrentDate }", font))
                     {
@@ -887,16 +887,16 @@ namespace ConsoleAppGeneratePDFFile
                     table10 = new PdfPTable(1);
                     table10.TotalWidth = 160;
                     table10.AddCell(pdfPCell);
-                    table10.WriteSelectedRows(0, -1, 205, 650, cb);
+                    table10.WriteSelectedRows(0, -1, 205, 675, cb);
 
                     pdfPCell = new PdfPCell(new Phrase("Destinataire", font))
                     {
                         VerticalAlignment = Element.ALIGN_MIDDLE,
                         HorizontalAlignment = Element.ALIGN_CENTER,
-                        BorderWidth = 1,
-                        Padding = 3
+                        BorderWidth = 1
                     };
 
+                    /*
                     PdfPTable table30 = new PdfPTable(2);
                     table30 = new PdfPTable(1);
                     //table30.HorizontalAlignment = Element.ALIGN_CENTER;
@@ -915,6 +915,36 @@ namespace ConsoleAppGeneratePDFFile
                     pdfPCell.HorizontalAlignment = Element.ALIGN_CENTER;
                     table30.AddCell(paragraph);
                     table30.WriteSelectedRows(0, -1, 385, 650, cb);
+                    */
+                    PdfContentByte pdfContentByte30 = masterWriter.DirectContent;
+                    PdfPTable table30 = new PdfPTable(1);
+                    table30.TotalWidth = 190;
+
+                    PdfPTable sTable30 = new PdfPTable(2);
+                    pdfPCell = new PdfPCell();
+                    Paragraph paragraph30 = new Paragraph
+                        {
+                            new Phrase("Destinataire", new Font(Font.FontFamily.TIMES_ROMAN,
+                                                        11, Font.BOLD, BaseColor.BLACK))
+                        };
+                    pdfPCell.AddElement(paragraph30);
+                    sTable30.AddCell(pdfPCell);
+                    table30.AddCell(paragraph30);
+
+                    pdfPCell = new PdfPCell();
+                    paragraph30 = new Paragraph
+                        {
+                            new Phrase($" Nombre de Pv                          { _report.Destinataire } \n\n",
+                                       new Font(Font.FontFamily.TIMES_ROMAN,
+                                       11, Font.NORMAL, BaseColor.BLACK)),
+                            new Phrase($" Nombre de Campagne             { _report.Prestataire } \n\n\n\n\n\n\n",
+                                       new Font(Font.FontFamily.TIMES_ROMAN,
+                                       11, Font.NORMAL, BaseColor.BLACK))
+                        };
+                    pdfPCell.AddElement(paragraph30);
+                    sTable30.AddCell(pdfPCell);
+                    table30.AddCell(paragraph30);
+                    table30.WriteSelectedRows(0, -1, 385, 675, cb);
                     #endregion
 
                     #region -- Second ligne --
@@ -924,7 +954,7 @@ namespace ConsoleAppGeneratePDFFile
 
                     PdfPTable sTable = new PdfPTable(2);
                     pdfPCell = new PdfPCell();
-                    paragraph = new Paragraph
+                    Paragraph paragraph = new Paragraph
                         {
                             new Phrase($"{ _report.BfpParam1 } \n\n", new Font(Font.FontFamily.TIMES_ROMAN,
                                        11, Font.NORMAL, BaseColor.BLACK)),
@@ -951,7 +981,6 @@ namespace ConsoleAppGeneratePDFFile
                     table100.WriteSelectedRows(0, -1, 20, 630, cb);
                     #endregion
 
-                    masterDocument.Add(new Paragraph("\n\r"));
                     masterDocument.Add(new Paragraph("\n\r"));
                     masterDocument.Add(new Paragraph("\n\r"));
                     masterDocument.Add(new Paragraph("\n\r"));
