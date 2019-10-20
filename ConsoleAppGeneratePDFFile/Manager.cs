@@ -17,7 +17,6 @@ namespace ConsoleAppGeneratePDFFile
     {
         private static Report _report = new Report();
 
-
         public static string FilePath { get; set; } = "\\test.pdf";
 
         #region -- ************** !!!!!!!!!!!!!!!!!!! *************** --
@@ -223,15 +222,11 @@ namespace ConsoleAppGeneratePDFFile
                 Headspace.HorizontalAlignment = 0;/**Left=0,Centre=1,Right=2**/
                 tableHeader.AddCell(Headspace);
 
-
-
                 Headspace = new PdfPCell(new Phrase(" ", TableFontSmall));
                 Headspace.BorderWidth = 0;
                 Headspace.HorizontalAlignment = 0;/**Left=0,Centre=1,Right=2**/
                 tableHeader.AddCell(Headspace);
                 doc.Add(tableHeader);
-
-
 
                 PdfPTable tblAcNo = new PdfPTable(1);
                 float[] colWidthsaccingo = { 1000 };
@@ -763,7 +758,7 @@ namespace ConsoleAppGeneratePDFFile
                 doc.Close();
             }
 
-        } 
+        }
         #endregion
 
         public static void CreatePDF(DataTable dataTable, string repositoryPath)
@@ -958,7 +953,7 @@ namespace ConsoleAppGeneratePDFFile
                         {
                             new Phrase($"{ _report.BfpParam1 } \n\n", new Font(Font.FontFamily.TIMES_ROMAN,
                                        11, Font.NORMAL, BaseColor.BLACK)),
-                            new Phrase($"{ _report.BfpParam2 } \n\n", new Font(Font.FontFamily.TIMES_ROMAN, 
+                            new Phrase($"{ _report.BfpParam2 } \n\n", new Font(Font.FontFamily.TIMES_ROMAN,
                                        11, Font.NORMAL, BaseColor.BLACK))
                         };
                     pdfPCell.AddElement(paragraph);
@@ -968,11 +963,11 @@ namespace ConsoleAppGeneratePDFFile
                     pdfPCell = new PdfPCell();
                     paragraph = new Paragraph
                         {
-                            new Phrase($" Nombre de Pv                          { _report.CountPv } \n\n", 
-                                       new Font(Font.FontFamily.TIMES_ROMAN, 
+                            new Phrase($" Nombre de Pv                          { _report.CountPv } \n\n",
+                                       new Font(Font.FontFamily.TIMES_ROMAN,
                                        11, Font.NORMAL, BaseColor.BLACK)),
-                            new Phrase($" Nombre de Campagne             { _report.CountCampagne } \n\n", 
-                                       new Font(Font.FontFamily.TIMES_ROMAN, 
+                            new Phrase($" Nombre de Campagne             { _report.CountCampagne } \n\n",
+                                       new Font(Font.FontFamily.TIMES_ROMAN,
                                        11, Font.NORMAL, BaseColor.BLACK))
                         };
                     pdfPCell.AddElement(paragraph);
@@ -986,7 +981,7 @@ namespace ConsoleAppGeneratePDFFile
                     masterDocument.Add(new Paragraph("\n\r"));
                     masterDocument.Add(new Paragraph("\n\r"));
                     masterDocument.Add(new Paragraph("\n\r"));
-                    Paragraph ligneParagraphe = new Paragraph(new Chunk(new LineSeparator(0.0F, 100.0F, 
+                    Paragraph ligneParagraphe = new Paragraph(new Chunk(new LineSeparator(0.0F, 100.0F,
                                       BaseColor.BLACK, Element.ALIGN_LEFT, 1)));
                     masterDocument.Add(ligneParagraphe);
 
@@ -996,9 +991,9 @@ namespace ConsoleAppGeneratePDFFile
                     //// -- Ajout de saut ligne --
                     //masterDocument.Add(new Paragraph("\n\r"));
                     VerticalPositionMark seperator = new LineSeparator();
-                    seperator.Offset = -20f;                             
+                    seperator.Offset = -20f;
 
-                    //Get columns names in the pdf file
+                    //Get columnHeaders names in the pdf file
                     for (int column = 0; column < dataTable.Columns.Count; column++)
                     {
                         PdfPCell pdfColumnCell = new PdfPCell(new Phrase(dataTable.Columns[column].ColumnName));
@@ -1029,7 +1024,7 @@ namespace ConsoleAppGeneratePDFFile
 
 
                     #region -- Total --
-                    
+
                     ligneParagraphe = new Paragraph(new Chunk(new LineSeparator(0.20F, 100.0F,
                                      BaseColor.BLACK, Element.ALIGN_LEFT, 1)));
                     //ligneParagraphe.Font.Color = Font.BOLD;
@@ -1082,8 +1077,9 @@ namespace ConsoleAppGeneratePDFFile
                     masterDocument.Add(ligneParagraphe);
                     #endregion
 
-                    // -- Define footer --
-                    OnEndPage(masterWriter, masterDocument);
+                    //// -- Define footer --
+                    //OnEndPage(masterWriter, masterDocument);
+                    OnEndPage(masterWriter, masterDocument, baseFont);
 
                     masterDocument.Add(gridTable);
 
@@ -1108,16 +1104,438 @@ namespace ConsoleAppGeneratePDFFile
             }
         }
 
-        #region -- Set Header and Footer --
-        public static void OnEndPage(PdfWriter writer, Document document)
+        public static void CreatePDFV2(DataTable dataTable, string repositoryPath)
         {
+            //PdfWriter masterWriter = null;
+            string fileName = string.Empty;
+            DateTime fileCreationDatetime = DateTime.Now;
+            string imgPath = "https://ftp.mediaperf.com/img/logo.gif";
+            imgPath = @"C:\Users\Sweet Family\Desktop\logo.jpg";
+            var widthPercentage = 96;
+
+            //fileName = string.Format("{0}.pdf", fileCreationDatetime.ToString(@"yyyyMMdd") + "_" + fileCreationDatetime.ToString(@"HHmmss"));
+            string fullPdfPath = repositoryPath + FilePath;
+
+            if (File.Exists(fullPdfPath))
+            {
+                File.Delete(fullPdfPath);
+            }
+
+            try
+            {
+                FileStream masterStream = new FileStream(fullPdfPath, FileMode.Create);
+                using (Document masterDocument = new Document(PageSize.A4, 8, 8, 42, 10))
+                using (PdfWriter masterWriter = PdfWriter.GetInstance(masterDocument, masterStream))
+                {
+                    //masterWriter.PageEvent = new MyPageHeader();
+
+                    masterDocument.Open();
+
+                    PdfContentByte pdfContentByte = masterWriter.DirectContent;
+                    Chunk verticalPositionMark = new Chunk(new VerticalPositionMark());
+                    var lineSeparator = new LineSeparator(2.0F, 96.0F, BaseColor.BLACK, Element.ALIGN_CENTER, 1);
+                    #region -- Define fonts --
+                    BaseFont baseFont = BaseFont.CreateFont(BaseFont.COURIER, BaseFont.CP1252, false);
+                    var boldFontEleventBlack = new Font(baseFont, 11, Font.BOLD, BaseColor.BLACK);
+                    var normalFontEleventBlack = new Font(baseFont, 11, Font.NORMAL, BaseColor.BLACK);
+                    var boldFontNineBlack = new Font(baseFont, 9, Font.BOLD, BaseColor.BLACK);
+                    var normalFontNimeBlack = new Font(baseFont, 9, Font.NORMAL, BaseColor.BLACK);
+                    var boldFontTwelveBlack = new Font(baseFont, 12, Font.BOLD, BaseColor.BLACK);
+                    var normalFontTwelveBlack = new Font(baseFont, 12, Font.NORMAL, BaseColor.BLACK);
+                    var boldFontTenBlack = new Font(baseFont, 10, Font.BOLD, BaseColor.BLACK);
+                    var normalFontTenBlack = new Font(baseFont, 10, Font.NORMAL, BaseColor.BLACK);
+                    //var TableFontmini_ARBold8 = FontFactory.GetFont("Calibri", 8, Font.BOLDITALIC, BaseColor.BLACK);
+                    #endregion
+
+                    // -- Populate dynamycs feelds --
+                    ConsolidateReport(dataTable);
+
+                    #region -- Set Header --.
+                    Image imagePath = Image.GetInstance(imgPath);
+                    imagePath.ScalePercent(80f);
+
+                    PdfPTable mtable = new PdfPTable(2);
+                    mtable.WidthPercentage = 100;
+                    mtable.DefaultCell.Border = Rectangle.NO_BORDER;
+
+                    PdfPTable table = new PdfPTable(5);
+                    table.WidthPercentage = 100;
+                    PdfPCell cell = new PdfPCell(new Phrase("2"));
+                    cell.Colspan = 6;
+                    //cell.Rowspan = 2;
+                    cell.HorizontalAlignment = 1;
+                    Paragraph para = new Paragraph();
+                    para.Add(new Chunk(imagePath, 5, -40));
+                    cell.AddElement(para);
+                    cell.BorderColor = BaseColor.WHITE;
+                    table.AddCell(cell);
+                    mtable.AddCell(table);
+
+                    table = new PdfPTable(3);
+                    table.WidthPercentage = 70;
+                    cell = new PdfPCell(new Phrase("Relevé de redévences", new Font(Font.FontFamily.TIMES_ROMAN,
+                                        20, Font.BOLD, BaseColor.BLACK)));
+                    cell.Colspan = 2;
+                    cell.Padding = 2;
+                    cell.HorizontalAlignment = 1;
+                    table.AddCell(cell);
+                    table.AddCell(new PdfPCell(new Phrase($"              Page \n\r              { _report.CurrentPage }/{ _report.TotalPageNumber }",
+                                               new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL, BaseColor.BLACK))));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell = new PdfPCell(new Phrase("Ceci n'est pas une facture", new Font(Font.FontFamily.TIMES_ROMAN, 12,
+                                                   Font.BOLD, BaseColor.BLACK)));
+                    cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    cell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                    cell.MinimumHeight = 18;
+                    cell.PaddingBottom = 2;
+                    cell.Colspan = 3;
+                    cell.HorizontalAlignment = 1;
+                    table.AddCell(cell);
+
+                    mtable.AddCell(table);
+                    masterDocument.Add(mtable);
+                    #endregion
+
+                    #region -- Duplicata --
+                    var docFooter = new Paragraph();
+                    var footerFont = FontFactory.GetFont(FontFactory.HELVETICA_OBLIQUE, 42f, BaseColor.LIGHT_GRAY);
+                    docFooter.Font = footerFont;
+                    docFooter.Add("\n\r");
+                    docFooter.Add(new Chunk("DUPLICATA"));
+                    docFooter.Alignment = Element.ALIGN_RIGHT;
+                    masterDocument.Add(docFooter);
+                    #endregion
+
+                    #region -- Set first line  --
+                    PdfPCell pdfPCell = new PdfPCell();
+                    PdfPTable table0 = new PdfPTable(2);
+                    table0 = new PdfPTable(1);
+                    table0.TotalWidth = 165;
+
+                    pdfPCell = new PdfPCell();
+                    Paragraph numRdvParagraph = new Paragraph();
+                    numRdvParagraph.Add(new Phrase("   N° RdR", boldFontEleventBlack));
+                    numRdvParagraph.Add(new Chunk($"     { _report.RoyaltyFeeNumber } ", normalFontEleventBlack));
+                    pdfPCell.AddElement(numRdvParagraph);
+                    pdfPCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    pdfPCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                    pdfPCell.VerticalAlignment = Element.ALIGN_CENTER;
+                    table0.AddCell(pdfPCell);
+                    table0.WriteSelectedRows(0, -1, 20, 670, pdfContentByte);
+
+                    pdfPCell = new PdfPCell();
+                    Paragraph dateParagraph = new Paragraph();
+                    dateParagraph.Add(new Phrase("   Date", boldFontEleventBlack));
+                    dateParagraph.Add(new Chunk($"     { _report.CurrentDate } ", normalFontEleventBlack));
+                    pdfPCell.AddElement(dateParagraph);
+                    pdfPCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    pdfPCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                    table0.AddCell(dateParagraph);
+
+                    PdfPTable table10 = new PdfPTable(2);
+                    table10 = new PdfPTable(1);
+                    table10.TotalWidth = 165;
+                    table10.AddCell(pdfPCell);
+                    table10.WriteSelectedRows(0, -1, 200, 670, pdfContentByte);
+                    pdfPCell = new PdfPCell(new Phrase("Destinataire", boldFontEleventBlack))
+                    {
+                        VerticalAlignment = Element.ALIGN_MIDDLE,
+                        HorizontalAlignment = Element.ALIGN_CENTER,
+                        BorderWidth = 1
+                    };
+                    pdfPCell.MinimumHeight = 35;
+
+                    //PdfContentByte pdfContentByte30 = pdfContentByte;
+                    PdfPTable table30 = new PdfPTable(1);
+                    table30.TotalWidth = 190;
+
+                    PdfPTable sTable30 = new PdfPTable(2);
+                    pdfPCell = new PdfPCell();
+                    Paragraph paragraph30 = new Paragraph
+                        {
+                            new Phrase("Destinataire", boldFontEleventBlack)
+                        };
+                    pdfPCell.HorizontalAlignment = Element.ALIGN_RIGHT;
+                    pdfPCell.AddElement(paragraph30);
+                    sTable30.AddCell(pdfPCell);
+                    table30.AddCell(paragraph30);
+
+                    pdfPCell = new PdfPCell();
+                    paragraph30 = new Paragraph();
+                    paragraph30.Add(new Phrase($"\n\n{ _report.Destinataire } \n\n", normalFontEleventBlack));
+                    paragraph30.Add(new Phrase($"{ _report.Prestataire } \n\n", normalFontEleventBlack));
+                    paragraph30.Add(new Phrase($"{ _report.AdressePrestataire } \n\n\n\n\n\n\n\n", normalFontEleventBlack));
+                    pdfPCell.AddElement(paragraph30);
+                    paragraph30.SetLeading(2.8f, 1.2f);
+                    sTable30.AddCell(pdfPCell);
+                    table30.AddCell(paragraph30);
+                    table30.WriteSelectedRows(0, -1, 385, 670, pdfContentByte);
+                    #endregion
+
+                    #region -- Second line --
+                    PdfPTable table100 = new PdfPTable(1);
+                    table100.TotalWidth = 345f;
+
+                    PdfPTable sTable = new PdfPTable(2);
+                    pdfPCell = new PdfPCell();
+                    Paragraph paragraph = new Paragraph
+                        {
+                            new Phrase($"{ _report.BfpParam1 } \n\n", boldFontEleventBlack),
+                            new Phrase($"{ _report.BfpParam2 } \n\n\n\n", boldFontEleventBlack)
+                        };
+                    pdfPCell.AddElement(paragraph);
+                    sTable.AddCell(pdfPCell);
+                    table100.AddCell(paragraph);
+
+                    pdfPCell = new PdfPCell();
+                    paragraph = new Paragraph
+                        {
+                            new Phrase($"\n Nombre de Pv                 { _report.CountPv } \n\r", normalFontEleventBlack),
+                            new Phrase($" Nombre de Campagne          { _report.CountCampagne } \n\n", normalFontEleventBlack)
+                        };
+                    pdfPCell.AddElement(paragraph);
+                    sTable.AddCell(pdfPCell);
+                    table100.AddCell(paragraph);
+                    paragraph.SetLeading(5.8f, 5.2f);
+                    table100.WriteSelectedRows(0, -1, 20, 645, pdfContentByte);
+                    #endregion
+
+                    // -- Draw horizontal line. --
+                    Paragraph firstLineSeparator = new Paragraph(new Chunk(lineSeparator));
+                    firstLineSeparator.SpacingBefore = 205f;
+                    masterDocument.Add(firstLineSeparator);
+                    
+                    PdfContentByte contentByte = pdfContentByte;
+                    contentByte.SetLineWidth(3);
+                    contentByte.MoveTo(22, 14);
+                    contentByte.LineTo(masterDocument.PageSize.Width - 22, 14);
+                    contentByte.SetColorStroke(BaseColor.BLACK);
+                    contentByte.Stroke();
+
+                    #region -- Generate Grid --
+                    PdfPTable masterTable = new PdfPTable(dataTable.Columns.Count);
+                    PdfPTable objectTable = new PdfPTable(dataTable.Columns.Count);
+                    //objectTable.WidthPercentage = masterDocument.PageSize.Width - masterDocument.LeftMargin - masterDocument.RightMargin;
+                    objectTable.WidthPercentage = widthPercentage;
+                                       
+                    // -- Add Header row for every page --
+                    objectTable.HeaderRows = 1;
+
+                    // -- Set spacing between gridView and  --
+                    objectTable.SpacingBefore = 10f;
+
+                    List<string> columnHeaders = new List<string>();
+
+                    // -- Set columns widths --
+                    float[] widths = new float[] { 12f, 12f, 60f, 12f, 30f };
+                    objectTable.SetWidths(widths);
+
+                    // -- Get columnHeaders names in the pdf file --
+                    for (int column = 0; column < dataTable.Columns.Count; column++)
+                    {
+                        PdfPCell pdfColumnCell = new PdfPCell(new Phrase(
+                                dataTable.Columns[column].ColumnName)
+                            );
+
+                        pdfColumnCell.MinimumHeight = 25;
+                        pdfColumnCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+
+                        var columnName = pdfColumnCell.Phrase[0].ToString();
+                        columnHeaders.Add(columnName);
+                                             
+
+                        SetColumnAlignment(dataTable, pdfColumnCell, column);
+                        pdfColumnCell.BackgroundColor = BaseColor.WHITE;
+
+                        objectTable.AddCell(pdfColumnCell);
+                    }
+
+                    var _objectTable = new PdfPTable(columnHeaders.Count) { WidthPercentage = 100 };
+                    _objectTable.SetWidths(GetHeaderWidths(boldFontEleventBlack, columnHeaders.ToArray()));
+
+                    // -- Add values of DataTable in pdf file --
+                    for (int row = 0; row < dataTable.Rows.Count; row++)
+                    {
+                        for (int col = 0; col < dataTable.Columns.Count; col++)
+                        {
+                            PdfPCell pdfColumnCell = new PdfPCell(new Phrase(
+                                    dataTable.Rows[row][col].ToString(),
+                                    normalFontTenBlack)
+                                );
+
+                            // -- Align the pdfColumnCell in the center --
+                            SetColumnAlignment(dataTable, pdfColumnCell, col);
+
+                            objectTable.AddCell(pdfColumnCell);
+                        }
+                    }
+
+                    masterDocument.Add(objectTable);
+
+                    //PdfPCell masterCell = new PdfPCell(objectTable);
+                    //masterTable.AddCell(masterCell);
+                    ///
+                    //masterTable.WriteSelectedRows(0, -1, 500, 300, pdfContentByte);
+                    #endregion
+
+                    #region -- Resume --
+                    PdfPTable billanTable = new PdfPTable(1);
+                    billanTable.WidthPercentage = widthPercentage;
+
+                    PdfPCell billanCell = new PdfPCell();
+                    string billan = $"1498 - { _report.Destinataire } - { _report.Destinataire }      Total   39       533,34";
+                    billanCell = new PdfPCell(new Phrase(billan, boldFontTwelveBlack));
+                    billanCell.BackgroundColor = BaseColor.LIGHT_GRAY; ;
+                    billanCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                    billanCell.MinimumHeight = 25;
+                    billanTable.AddCell(billanCell);
+                    masterDocument.Add(billanTable);
+                    #endregion
+                                       
+                    #region -- Total --
+                    PdfPTable royalFeeTotalMasterTable = new PdfPTable(1);
+                    royalFeeTotalMasterTable.TotalWidth = 400;
+                    PdfPTable royalFeeTotalTable = new PdfPTable(4);
+
+                    PdfPCell royalFeeTotalCell = new PdfPCell(new Phrase(""));
+                    royalFeeTotalCell.Border = Rectangle.NO_BORDER;
+                    royalFeeTotalCell.BorderColor = BaseColor.WHITE;
+                    royalFeeTotalTable.AddCell(royalFeeTotalCell);
+                    royalFeeTotalCell = new PdfPCell(new Phrase("HT", boldFontNineBlack));
+                    royalFeeTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                    royalFeeTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    royalFeeTotalTable.AddCell(royalFeeTotalCell);
+                    royalFeeTotalCell = new PdfPCell(new Phrase("TVA 20,00", boldFontNineBlack));
+                    royalFeeTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                    royalFeeTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    royalFeeTotalTable.AddCell(royalFeeTotalCell);
+
+                    royalFeeTotalCell = new PdfPCell(new Phrase("TTC", boldFontNineBlack));
+                    royalFeeTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                    royalFeeTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    royalFeeTotalTable.AddCell(royalFeeTotalCell);
+                    royalFeeTotalCell = new PdfPCell(new Phrase("Total du relevé", boldFontNineBlack));
+                    royalFeeTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                    royalFeeTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    royalFeeTotalTable.AddCell(royalFeeTotalCell);
+                    royalFeeTotalCell = new PdfPCell(new Phrase($"{ _report.HtMontant }", boldFontNineBlack));
+                    royalFeeTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                    royalFeeTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    royalFeeTotalTable.AddCell(royalFeeTotalCell);
+
+                    royalFeeTotalCell = new PdfPCell(new Phrase($"{ _report.TVA }", boldFontNineBlack));
+                    royalFeeTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                    royalFeeTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    royalFeeTotalTable.AddCell(royalFeeTotalCell);
+                    royalFeeTotalCell = new PdfPCell(new Phrase($"{ _report.TTCMontant }", boldFontNineBlack));
+                    royalFeeTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                    royalFeeTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    royalFeeTotalTable.AddCell(royalFeeTotalCell);
+                    royalFeeTotalTable.HorizontalAlignment = Element.ALIGN_LEFT;
+
+                    PdfPCell royalFeeTotalMasterCell = new PdfPCell(royalFeeTotalTable);
+
+                    royalFeeTotalMasterTable.AddCell(royalFeeTotalMasterCell);
+                    royalFeeTotalMasterTable.WriteSelectedRows(0, -1, 15, 110, pdfContentByte);
+                    #endregion
+
+                    // -- Draw horizontal line. --
+                    Paragraph secondLineSeparator = new Paragraph(new Chunk(lineSeparator));
+                    secondLineSeparator.SpacingAfter = 15f;
+                    masterDocument.Add(secondLineSeparator);
+
+                    //OnEndPageTest(masterWriter, masterDocument);
+
+                    //// -- Define footer --
+                    OnEndPage(masterWriter, masterDocument, baseFont);
+                    //OnEndPageTest(masterWriter, masterDocument);
+                    
+                    masterDocument.Close();
+                    masterStream.Close();
+                    masterWriter.Close();
+
+                    Process.Start(fullPdfPath);
+                }
+            }
+            catch (DocumentException de)
+            {
+                throw de;
+            }
+            catch (IOException ioe)
+            {
+                throw ioe;
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.ToString());
+            }
+            finally
+            {
+
+            }
+        }
+
+        #region -- Set Header and Footer --
+        /// <summary>
+        /// -- OK --
+        /// </summary>
+        /// <param name="writer"></param>
+        /// <param name="document"></param>
+        /// <param name="baseFont"></param>
+        public static void OnEndPage(PdfWriter writer, Document document, BaseFont baseFont)
+        {
+            #region MyRegion
+            //PdfPTable table = new PdfPTable(1);
+            //table.TotalWidth = 70;
+            //table.TotalWidth = document.PageSize.Width - document.LeftMargin - document.RightMargin;
+            //PdfPTable table2 = new PdfPTable(1);
+
+            //List<string> footerTextList = new List<string>()
+            //{
+            //    "5 quai de Dion Bouton - 92816 Puteaux Cedex",
+            //    "Tél 01 40 99 21 21 - Fax 01 40 99 80 30",
+            //    "Société Anonyme au capital de 555.112.61€",
+            //    "R.C. Nantère B 332 403 997 - TVA Intra FR1133240397",
+            //    "Mediaperfomances"
+            //};
+
+            //PdfPCell cell2 = null;
+            //foreach (var footerText in footerTextList)
+            //{
+            //    cell2 = new PdfPCell(new Phrase(footerText, new Font(baseFont, 9, Font.NORMAL, BaseColor.BLACK)));
+            //    table2.AddCell(cell2);
+            //}
+
+            //cell2.Border = 0;
+            //cell2.BorderColor = BaseColor.WHITE;
+            //table2.DefaultCell.Border = Rectangle.NO_BORDER;
+            //PdfPCell cell = new PdfPCell(table2);
+            //cell.BorderColor = BaseColor.WHITE;
+            //table.AddCell(cell);
+            //table.DefaultCell.Border = 0;
+
+            //table.WriteSelectedRows(0, -1, 15, 70, writer.DirectContent); 
+            #endregion
+
+            #region -- Save No Ok --
+            /*
             PdfContentByte cb = writer.DirectContent;
             ColumnText ct = new ColumnText(cb);
-
+            ct.Alignment = Element.ALIGN_JUSTIFIED;
             cb.BeginText();
             cb.SetFontAndSize(BaseFont.CreateFont(BaseFont.TIMES_ROMAN, BaseFont.CP1252, BaseFont.NOT_EMBEDDED), 10.0f);
             cb.SetTextMatrix(document.LeftMargin, document.BottomMargin);
-            List<string> footerText = new List<string>()
+
+            ct.SetSimpleColumn(100, 100, 200, 200);
+            
+            //var table = new PdfPTable(2);
+            //cb.ShowText("000000000000000000\n\r\n\r");
+            //cb.ShowText("000000000000000000\n\r");
+            //cb.ShowText("000000000");
+            //cb.NewlineShowText("498745454545");
+
+            StringBuilder sb = new StringBuilder();
+            List<string> footerTextList = new List<string>()
             {
                 "5 quai de Dion Bouton - 92816 Puteaux Cedex",
                 "Tél 01 40 99 21 21 - Fax 01 40 99 80 30",
@@ -1126,35 +1544,78 @@ namespace ConsoleAppGeneratePDFFile
                 "Mediaperfomances"
             };
 
-            #region MyRegion
-            //PdfPTable table0 = new PdfPTable(2);
-            //PdfPCell cel = new PdfPCell();
-            //Paragraph para = new Paragraph();
-            //para.Add(new Phrase("5 quai de Dion Bouton - 92816 Puteaux Cedex"));
-            //para.Add(new Chunk("Tél 01 40 99 21 21 - Fax 01 40 99 80 30"));
-            //para.Add(new Phrase("Société Anonyme au capital de 555.112.61€"));
-            //cel.AddElement(para);
-            //table0.AddCell(cel);
-            //ct.AddElement(table0);
-            //document.Add(table0);
-            #endregion
+            //for (int i = 1; i < footerTextList.Count; i++)
+            //{
+            //    ct.AddText(new Phrase(sb.Append(footerTextList[i]).ToString()));
+            //    //ct.AddText(Chunk.NEWLINE);
+            //    ct.Go();
+            //}
 
-            //var ctes = new ColumnText(writer.DirectContent);
-            ct.SetSimpleColumn(100, 100, 200, 200);
-
-            var table = new PdfPTable(2);
-            foreach (var item in footerText)
+            foreach (string text in footerTextList)
             {
-                cb.ShowText(item);
-                //cb.NewlineShowText(item);
-                //cb.NewlineText();
-                //table.AddCell(item);
+                ct.AddText(new Phrase(sb.Append(text).ToString()));
+                ct.Go();
             }
 
-
-            ct.AddElement(table);
-            ct.Go();
+            //ct.AddElement(table);
+            //ct.Go();
             cb.EndText();
+            */
+            #endregion
+
+            #region -- Simple way --
+            PdfContentByte cb = writer.DirectContent;
+            cb.SetTextMatrix(document.LeftMargin, document.BottomMargin);
+            cb.SetLineWidth(150);
+            cb.SetFontAndSize(BaseFont.CreateFont(BaseFont.TIMES_ROMAN,
+                BaseFont.CP1252,
+                BaseFont.NOT_EMBEDDED),
+                8.0f);
+
+            ColumnText ct = new ColumnText(cb);
+            //ct.Alignment = Element.ALIGN_CENTER;
+
+            List<string> footerTextList = new List<string>
+            {
+                "24 quai Gallieni - 92156 SURESNES CEDEX \n",
+                "Tél 01 40 99 21 21 - Fax 01 40 99 80 30 \n",
+                "Société par action simplifié au capital de 555.112.61€uro \n",
+                "R.C. natèrre B 332 403 997 - TVA Intra FR1133240397 \n",
+                "Madiaperformances"
+            };
+
+            cb.BeginText();
+            foreach (string text in footerTextList)
+            {
+                cb.ShowText(text);
+            }
+
+            cb.EndText();
+            #endregion
+        }
+
+        public static void OnEndPageTest(PdfWriter writer, Document document)
+        {
+            PdfPTable table = new PdfPTable(1);
+            //table.WidthPercentage = 100; //PdfPTable.writeselectedrows below didn't like this
+            table.TotalWidth = document.PageSize.Width - document.LeftMargin - document.RightMargin; //this centers [table]
+            PdfPTable table2 = new PdfPTable(2);
+
+            //logo
+            PdfPCell cell2 = new PdfPCell(new Phrase("Image.GetInstance(@C:\\path\to\file.gif)"));
+            cell2.Colspan = 2;
+            table2.AddCell(cell2);
+
+            ////title
+            //cell2 = new PdfPCell(new Phrase("\nTITLE", new Font(Font.HELVETICA, 16, Font.BOLD | Font.UNDERLINE)));
+            cell2.HorizontalAlignment = Element.ALIGN_CENTER;
+            cell2.Colspan = 2;
+            table2.AddCell(cell2);
+
+            PdfPCell cell = new PdfPCell(table2);
+            table.AddCell(cell);
+
+            table.WriteSelectedRows(0, -1, document.LeftMargin, document.PageSize.Height - 36, writer.DirectContent);
         }
 
         public static void OnHeaderPage(PdfWriter writer, Document document)
@@ -1168,53 +1629,56 @@ namespace ConsoleAppGeneratePDFFile
 
             pdfContentByte.ShowText("5 quai de Dion Bouton - 92816 Puteaux Cedex \n\r");
         }
-
-        /// <summary>
-        /// ---   !!!!!!!!!!!!!  ---
-        /// </summary>
-        /// <param name="writer"></param>
-        /// <param name="document"></param>
-        private static void ZAE(PdfWriter writer, Document document)
-        {
-            PdfContentByte cb = writer.DirectContent;
-            ColumnText ct = new ColumnText(cb);
-
-            ct.SetSimpleColumn(120f, 500f, 250f, 780f);
-            Paragraph p = new Paragraph("This is a long paragraph that doesn't"
-                    + "fit the width we defined for the simple column of the"
-                    + "ColumnText object, so it will be distributed over several"
-                    + "lines (and we don't know in advance how many).");
-            ct.AddElement(p);
-        }
-
         #endregion
+        
+        #region Methods
+        private static float[] GetHeaderWidths(Font font, params string[] headers)
+        {
+            var total = 0;
+            var columns = headers.Length;
+            var widths = new int[columns];
+            for (var i = 0; i < columns; ++i)
+            {
+                var w = font.GetCalculatedBaseFont(true).GetWidth(headers[i]);
+                total += w;
+                widths[i] = w;
+            }
+            var result = new float[columns];
+            for (var i = 0; i < columns; ++i)
+            {
+                result[i] = (float)widths[i] / total * 100;
+            }
+            return result;
+        }
 
         private static void SetColumnAlignment(DataTable dataTable, PdfPCell cell, int i)
         {
             if (dataTable.Columns[i].DataType == typeof(string))
             {
-                cell.HorizontalAlignment = PdfPCell.ALIGN_LEFT;
+                cell.HorizontalAlignment = Element.ALIGN_LEFT;
+                cell.VerticalAlignment = Element.ALIGN_MIDDLE;
             }
             if (dataTable.Columns[i].DataType == typeof(Boolean))
             {
-                cell.HorizontalAlignment = PdfPCell.ALIGN_LEFT;
+                cell.HorizontalAlignment = Element.ALIGN_LEFT;
+                cell.VerticalAlignment = Element.ALIGN_MIDDLE;
             }
             if (dataTable.Columns[i].DataType == typeof(DateTime))
             {
-                cell.HorizontalAlignment = PdfPCell.ALIGN_CENTER;
+                cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                cell.VerticalAlignment = Element.ALIGN_MIDDLE;
             }
             if (dataTable.Columns[i].DataType == typeof(int))
             {
-                cell.HorizontalAlignment = PdfPCell.ALIGN_CENTER;
+                cell.HorizontalAlignment = Element.ALIGN_CENTER;
+                cell.VerticalAlignment = Element.ALIGN_MIDDLE;
             }
         }
-
 
         private static PdfPCell GetCell(string text)
         {
             return GetCell(text, 1, 1);
         }
-
 
         private static PdfPCell GetCell(string text, int colSpan, int rowSpan)
         {
@@ -1225,7 +1689,6 @@ namespace ConsoleAppGeneratePDFFile
 
             return cell;
         }
-        
 
         private static void ConsolidateReport(DataTable dataTable)
         {
@@ -1245,7 +1708,7 @@ namespace ConsoleAppGeneratePDFFile
 
             foreach (DataRow dataRow in dataSet)
             {
-                
+
                 //_report.AdressePrestataire = dataRow["BookTitle"].ToString();
             }
 
@@ -1255,8 +1718,11 @@ namespace ConsoleAppGeneratePDFFile
 
             string[] columnNames = (from dc in dataTable.Columns.Cast<DataColumn>()
                                     select dc.ColumnName).ToArray();
-        }
+        } 
+        #endregion
     }
+
+    // https://stackoverflow.com/questions/2321526/pdfptable-as-a-header-in-itextsharp
 
     public class Report
     {
@@ -1274,5 +1740,38 @@ namespace ConsoleAppGeneratePDFFile
         public decimal HtMontant { get; set; } = 533.39m;
         public decimal TVA { get; set; } = 106.67m;
         public decimal TTCMontant { get; set; } = 640.01m;
+    }
+
+
+    public class MyPageHeader : PdfPageEventHelper
+    {
+        //PdfPTable header = new PdfPTable(3);
+        //PdfPTable billanTable = new PdfPTable(1);
+        ////billanTable.WidthPercentage = 97;
+
+        //            PdfPCell billanCell = new PdfPCell();
+        //string billan = $"1498 - _report.Destinataire - _report.Destinataire     Total   39       533,34";
+        //billanCell = new PdfPCell(new Phrase(billan, boldFontTwelveBlack));
+        //            billanCell.BackgroundColor = BaseColor.LIGHT_GRAY; ;
+        //            billanCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+        //            billanCell.MinimumHeight = 25;
+        //            billanTable.AddCell(billanCell);
+        //            masterDocument.Add(billanTable);
+
+        public override void OnEndPage(PdfWriter writer, Document document)
+        {
+            PdfPTable headerTable = new PdfPTable(3);
+            headerTable.WidthPercentage = 97;
+
+            PdfPCell headerCell = new PdfPCell();
+            string billan = $"1498 - _report.Destinataire - _report.Destinataire     Total   39       533,34";
+            headerCell = new PdfPCell(new Phrase(billan));
+            headerCell.BackgroundColor = BaseColor.LIGHT_GRAY; ;
+            headerCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+            headerCell.MinimumHeight = 25;
+            headerTable.AddCell(headerCell);
+
+            headerTable.WriteSelectedRows(0, -1, document.Left, document.Top, writer.DirectContent);
+        }
     }
 }

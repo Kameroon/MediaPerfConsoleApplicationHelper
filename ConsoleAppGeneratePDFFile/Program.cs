@@ -1,4 +1,5 @@
-﻿using iTextSharp.text;
+﻿using DataAccess;
+using iTextSharp.text;
 using iTextSharp.text.pdf;
 using MigraDoc.Rendering;
 using System;
@@ -9,11 +10,18 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Tools;
 
 namespace ConsoleAppGeneratePDFFile
 {
     class Program
     {
+        private static readonly SQLDataBase sqlDB = new SQLDataBase(
+            "fr-sqlp02.hilti.com",
+            "E2MKI_Dataminer", 
+            "E2-MKI-ROBOT", 
+            "hiltisql0234");
+
         static void Main(string[] args)
         {
 
@@ -43,7 +51,12 @@ namespace ConsoleAppGeneratePDFFile
             ////  - ************************************* -
             //PDFManagerV1.ADDPdf(pdfPath);
 
-            Manager.CreatePDF(dateTable, pdfPath);
+            Manager.CreatePDFV2(dateTable, pdfPath);
+
+
+            //TestPDF.ManipulatePdf(pdfPath + "\\test.pdf", @"C:\Users\Sweet Family\Desktop\PdfFilesPath");
+
+            ////TestPDF.CreatePDFDocument(dateTable, pdfPath);
 
             ////CustomReports customReports = new CustomReports();
             ////customReports.CreatePDF("45555555555555555555555555");
@@ -118,8 +131,77 @@ namespace ConsoleAppGeneratePDFFile
             Console.WriteLine("");
         }
 
+        #region -- SQL Methods --
+        private string GetCustomerStreet(string customerID)
+        {
+            // - Get street from database -
+            string street = sqlDB.ExecuteScalar("SELECT Street FROM E2MKI_Dataminer.dbo.TD_Customer WHERE SalesOrg = '0900' AND CustomerID = '{0}'",
+                Parser.ToInt32(customerID).ToString()) as string;
 
+            // - Return an empty string if street not found -
+            return street ?? string.Empty;
+        }
 
+        private string GetUserFullName(string userID)
+        {
+            // - Get user full name from database -
+            string fullName = sqlDB.ExecuteScalar("SELECT FirstName + ' ' + UPPER(LastName) FROM E2MKI_VOC.dbo.TD_User WHERE UserID = '{0}'", userID) as string;
+
+            // - Return an empty string if name not found -
+            return fullName ?? string.Empty;
+        }
+
+        private static  void  r()
+        {
+            /*
+            // - Check if there is at least 1 machine -
+            if (customer.MachineList != null && customer.MachineList.Count > 0)
+            {
+                // - Generate IN clause (distinct materials) -
+                string inClause = customer.MachineList.Select(x => x.Code_Article).Distinct().Aggregate((total, next) => total + ',' + next);
+
+                using (DataTable pictureTable = sqlDB.GetDataTable("SELECT Item, Picture FROM E2MKI_CustomPrice.dbo.VD_Picture WHERE SalesOrg = 0 AND [Language] = 1 AND Item IN ({0})", inClause))
+                {
+                    foreach (DataRow pictureRow in pictureTable.Rows)
+                    {
+                        customer.PictureList.Add(new MaterialPicture()
+                        {
+                            Material = pictureRow["Item"].ToString(),
+                            Picture = (byte[])pictureRow["Picture"]
+                        });
+                    }
+                }
+
+                using (DataTable descTable = sqlDB.GetDataTable("SELECT Material, Description, IsCombo = CASE WHEN EXISTS (SELECT * FROM E2MKI_MaterialMaster.pricing.TD_MAST WHERE Material = MAKT.Material) THEN 1 ELSE 0 END FROM E2MKI_MaterialMaster.pricing.TD_MAKT AS MAKT WHERE Material IN ({0}) AND [Language] = 'F'", inClause))
+                {
+                    customer.MachineList = (from machine in customer.MachineList
+                                            from descRow in descTable.AsEnumerable().Where(x => x["Material"].ToString() == machine.Code_Article).DefaultIfEmpty()
+                                            where descRow == null || (int)descRow["IsCombo"] == 0
+                                            select new Machine()
+                                            {
+                                                Code_Article = machine.Code_Article,
+                                                Designation = descRow == null ? null : (string)descRow["Description"],
+                                                Serial = machine.Serial,
+                                                Duree = machine.Duree,
+                                                Date_Debut_Contrat = machine.Date_Debut_Contrat,
+                                                Date_Fin_Contrat = machine.Date_Fin_Contrat,
+                                                Ref_Organisation = machine.Ref_Organisation,
+                                                Num_Inventaire = machine.Num_Inventaire,
+                                                Centre_De_Coût = machine.Centre_De_Coût,
+                                                Type_Ligne = machine.Type_Ligne
+                                            }).ToList();
+                }
+
+                // - Build "IN" clause -
+                string inClause = contractTable.AsEnumerable()
+                    .Select(x => string.Format("'{0}'", x["ZZCONTRACTNO"])).
+                    Aggregate((total, next) => total + ',' + next);
+            }
+               */
+        }
+        #endregion
+
+        #region -- SAVE --
         private static PdfPCell GetCell(string text)
         {
             return GetCell(text, 1, 1);
@@ -134,7 +216,7 @@ namespace ConsoleAppGeneratePDFFile
 
             return cell;
         }
-        
+
         private static void GeneratePDF(string path)
         {
             //string imgUrl = @"C:\Users\Sweet Family\Desktop\imgDrole.png";
@@ -145,7 +227,7 @@ namespace ConsoleAppGeneratePDFFile
             var output = new FileStream(filePath, FileMode.Create);
 
             using (Document document = new Document(PageSize.A4, 10, 10, 42, 35))
-            using(var writer = PdfWriter.GetInstance(document, output))
+            using (var writer = PdfWriter.GetInstance(document, output))
             {
                 document.Open();
 
@@ -168,14 +250,14 @@ namespace ConsoleAppGeneratePDFFile
 
                 var titleFont = new Font(Font.FontFamily.UNDEFINED, 24);
                 var subTitleFont = new Font(Font.FontFamily.UNDEFINED, 16);
-                
+
                 PdfPTable table0 = new PdfPTable(2);
                 PdfContentByte cb = writer.DirectContent;
                 table0 = new PdfPTable(1);
                 table0.TotalWidth = 140;
                 table0.AddCell("TEST GAUCHE");
                 table0.WriteSelectedRows(0, -1, 35, 650, cb);
-                
+
                 PdfPTable table10 = new PdfPTable(2);
                 table10 = new PdfPTable(1);
                 table10.TotalWidth = 150;
@@ -213,10 +295,10 @@ namespace ConsoleAppGeneratePDFFile
                 //document.Add(paragraphTable1);
 
                 PdfPCell cell12 = new PdfPCell();
-                 //cell12.VerticalAlignment = Element.ALIGN_CENTER;
-                 //table1.AddCell(cell11);
-                 //table1.AddCell(cell12);
-                 
+                //cell12.VerticalAlignment = Element.ALIGN_CENTER;
+                //table1.AddCell(cell11);
+                //table1.AddCell(cell12);
+
 
                 Paragraph paragraphTable2 = new Paragraph();
                 paragraphTable2.SpacingAfter = 15f;
@@ -252,8 +334,8 @@ namespace ConsoleAppGeneratePDFFile
                 document.Close();
                 writer.Close();
             }
-                
-            
+
+
             // ...and start a viewer.
             Process.Start(filePath);
         }
@@ -267,7 +349,7 @@ namespace ConsoleAppGeneratePDFFile
             Document doc = new Document(PageSize.A4);
             var output = new FileStream(filePath, FileMode.Create);
             var writer = PdfWriter.GetInstance(doc, output);
-            
+
             doc.Open();
 
             var logo = Image.GetInstance(imgUrl);
@@ -289,13 +371,13 @@ namespace ConsoleAppGeneratePDFFile
 
             cell11.AddElement(new Paragraph("Thankyou for shoping at ABC traders,your order details are below",
                 subTitleFont));
-            
+
             cell11.VerticalAlignment = Element.ALIGN_LEFT;
             PdfPCell cell12 = new PdfPCell();
             cell12.VerticalAlignment = Element.ALIGN_CENTER;
             table1.AddCell(cell11);
             table1.AddCell(cell12);
-            
+
             PdfPTable table2 = new PdfPTable(3);
             //One row added
             PdfPCell cell21 = new PdfPCell();
@@ -338,7 +420,7 @@ namespace ConsoleAppGeneratePDFFile
             cell42.AddElement(new Paragraph("Customer ID : " + "011"));
             cell42.AddElement(new Paragraph("Balance : " + "3993"));
             cell42.VerticalAlignment = Element.ALIGN_RIGHT;
-                       
+
             table1.AddCell(cell41);
             table1.AddCell(cell42);
 
@@ -355,7 +437,7 @@ namespace ConsoleAppGeneratePDFFile
 
             DateTime fileCreationDatetime = DateTime.Now;
 
-            fileName = string.Format("{0}.pdf", 
+            fileName = string.Format("{0}.pdf",
                 fileCreationDatetime.ToString(@"yyyyMMdd") + "_" + fileCreationDatetime.ToString(@"HHmmss"));
 
             //string pdfPath = Server.MapPath(@"~\PDFs\") + fileName;
@@ -409,7 +491,7 @@ namespace ConsoleAppGeneratePDFFile
             try
             {
                 string imgUrl = @"C:\Users\Sweet Family\Desktop\imgDrole.png";
-                                
+
                 PDFManager pdfManager = new PDFManager(GetTable(), imgUrl);
 
                 // Create a MigraDoc document
@@ -458,31 +540,105 @@ namespace ConsoleAppGeneratePDFFile
         /// <returns></returns>
         private static List<Author> GetAuthors()
         {
+            var date = Convert.ToDateTime(DateTime.Now.Date.ToShortDateString());
             var authorList = new List<Author>();
 
-            authorList.Add(new Author("Mahesh Chand", 
-                35, 
+            authorList.Add(new Author("Mahesh Chand",
+                35,
                 "A Prorammer's Guide to ADO.NET",
                 true,
-                new DateTime(2003, 7, 10)));
-            authorList.Add(new Author("Neel Beniwal", 
+                date));
+            authorList.Add(new Author("Neel Beniwal",
                 18,
                 "Graphics Development with C#",
                 false,
-                new DateTime(2010, 2, 22)));
+                date));
             authorList.Add(new Author("Praveen Kumar",
-                28, 
-                "Mastering WCF", 
+                28,
+                "Mastering WCF",
                 true,
-                new DateTime(2012, 01, 01)));
-            authorList.Add(new Author("Mahesh Chand", 
-                35, 
-                "Graphics Programming with GDI+", 
-                true, 
-                new DateTime(2008, 01, 20)));
+                date));
+            authorList.Add(new Author("Mahesh Chand",
+                35,
+                "Graphics Programming with GDI+",
+                true,
+                date));
             authorList.Add(new Author("Raj Kumar",
-                30, "Building Creative Systems", false, new DateTime(2011, 6, 3)));
-
+                30, 
+                "Building Creative Systems", 
+                false, 
+                date));
+            authorList.Add(new Author("Neel Beniwal",
+               18,
+               "Graphics Development with C#",
+               false,
+               date));
+            authorList.Add(new Author("Praveen Kumar",
+                28,
+                "Mastering WCF",
+                true,
+                date));
+            authorList.Add(new Author("Mahesh Chand",
+                35,
+                "Graphics Programming with GDI+",
+                true,
+                date));
+            authorList.Add(new Author("Mahesh Chand",
+               35,
+               "A Prorammer's Guide to ADO.NET",
+               true,
+               date));
+            authorList.Add(new Author("Neel Beniwal",
+                18,
+                "Graphics Development with C#",
+                false,
+                date));
+            authorList.Add(new Author("Praveen Kumar",
+                28,
+                "Mastering WCF",
+                true,
+                date));
+            authorList.Add(new Author("Mahesh Chand",
+                35,
+                "Graphics Programming with GDI+",
+                true,
+                date));
+            authorList.Add(new Author("Raj Kumar",
+                30,
+                "Building Creative Systems",
+                false,
+                date));
+            authorList.Add(new Author("Neel Beniwal",
+               18,
+               "Graphics Development with C#",
+               false,
+               date));
+            authorList.Add(new Author("Praveen Kumar",
+                28,
+                "Mastering WCF",
+                true,
+                date));
+            authorList.Add(new Author("Mahesh Chand",
+                35,
+                "Graphics Programming with GDI+",
+                true,
+                date));
+            authorList.Add(new Author("Mahesh Chand",
+               35,
+               "A Prorammer's Guide to ADO.NET",
+               true,
+               date));
+            authorList.Add(new Author("Neel Beniwal",
+                18,
+                "Graphics Development with C#",
+                false,
+                date));
+            authorList.Add(new Author("Praveen Kumar",
+                28,
+                "Mastering WCF",
+                true,
+                date));
+           
             return authorList;
         }
 
@@ -507,6 +663,7 @@ namespace ConsoleAppGeneratePDFFile
             table.Rows.Add(21, "Combivent", "Jahanzaib", DateTime.Now);
             table.Rows.Add(100, "Dilantin", "Talha", DateTime.Now);
             return table;
-        }
+        } 
+        #endregion
     }
 }
