@@ -114,7 +114,7 @@ namespace ConsoleAppGeneratePDFFile
 
             Process.Start(filePath);
         }
-
+                
         /// <summary>
         /// -- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! --
         /// </summary>
@@ -892,11 +892,11 @@ namespace ConsoleAppGeneratePDFFile
                     };
 
                     /*
-                    PdfPTable table30 = new PdfPTable(2);
-                    table30 = new PdfPTable(1);
-                    //table30.HorizontalAlignment = Element.ALIGN_CENTER;
-                    table30.TotalWidth = 190;
-                    table10.AddCell(pdfPCell);
+                    PdfPTable headerRightSubTable = new PdfPTable(2);
+                    headerRightSubTable = new PdfPTable(1);
+                    //headerRightSubTable.HorizontalAlignment = Element.ALIGN_CENTER;
+                    headerRightSubTable.TotalWidth = 190;
+                    headerRightTable.AddCell(pdfPCell);
                     var paragraph = new Paragraph
                         {
                             new Phrase("Destinataire \n\n", new Font(Font.FontFamily.TIMES_ROMAN, 
@@ -908,8 +908,8 @@ namespace ConsoleAppGeneratePDFFile
                     pdfPCell.Border = 2;
                     pdfPCell.VerticalAlignment = Element.ALIGN_CENTER;
                     pdfPCell.HorizontalAlignment = Element.ALIGN_CENTER;
-                    table30.AddCell(paragraph);
-                    table30.WriteSelectedRows(0, -1, 385, 650, cb);
+                    headerRightSubTable.AddCell(paragraph);
+                    headerRightSubTable.WriteSelectedRows(0, -1, 385, 650, cb);
                     */
                     PdfContentByte pdfContentByte30 = masterWriter.DirectContent;
                     PdfPTable table30 = new PdfPTable(1);
@@ -1104,8 +1104,19 @@ namespace ConsoleAppGeneratePDFFile
             }
         }
 
-        public static void CreatePDFV2(DataTable dataTable, string repositoryPath)
+        // -- https://forums.asp.net/t/2000508.aspx?Pdf+File+Creation+itextsharp+multiple+user+at+sametime --
+        // -- https://www.codeproject.com/Articles/691723/Csharp-Generate-and-Deliver-PDF-Files-On-Demand-fr --
+        /// <summary>
+        /// -- async --
+        /// </summary>
+        /// <param name="dataTable"></param>
+        /// <param name="repositoryPath"></param>
+        public static bool CreatePDFV2(DataTable dataTable, string repositoryPath)
         {
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            bool result = false;
+
             //PdfWriter masterWriter = null;
             string fileName = string.Empty;
             DateTime fileCreationDatetime = DateTime.Now;
@@ -1113,18 +1124,18 @@ namespace ConsoleAppGeneratePDFFile
             imgPath = @"C:\Users\Sweet Family\Desktop\logo.jpg";
             var widthPercentage = 96;
 
-            //fileName = string.Format("{0}.pdf", fileCreationDatetime.ToString(@"yyyyMMdd") + "_" + fileCreationDatetime.ToString(@"HHmmss"));
-            string fullPdfPath = repositoryPath + FilePath;
+            fileName = string.Format("{0}.pdf", fileCreationDatetime.ToString(@"yyyyMMdd") + "_" + fileCreationDatetime.ToString(@"HHmmss" + ".pdf"));
+            string fullPdfPath = repositoryPath + fileName;
 
             if (File.Exists(fullPdfPath))
-            {
+            {               
                 File.Delete(fullPdfPath);
             }
 
             try
             {
                 FileStream masterStream = new FileStream(fullPdfPath, FileMode.Create);
-                using (Document masterDocument = new Document(PageSize.A4, 8, 8, 42, 10))
+                using (Document masterDocument = new Document(PageSize.A4, 8, 8, 35, 10))
                 using (PdfWriter masterWriter = PdfWriter.GetInstance(masterDocument, masterStream))
                 {
                     //masterWriter.PageEvent = new MyPageHeader();
@@ -1134,8 +1145,10 @@ namespace ConsoleAppGeneratePDFFile
                     PdfContentByte pdfContentByte = masterWriter.DirectContent;
                     Chunk verticalPositionMark = new Chunk(new VerticalPositionMark());
                     var lineSeparator = new LineSeparator(2.0F, 96.0F, BaseColor.BLACK, Element.ALIGN_CENTER, 1);
+
                     #region -- Define fonts --
                     BaseFont baseFont = BaseFont.CreateFont(BaseFont.COURIER, BaseFont.CP1252, false);
+                    var noneFontOneWhite = new Font(baseFont, 1, Font.NORMAL, BaseColor.WHITE);
                     var boldFontEleventBlack = new Font(baseFont, 11, Font.BOLD, BaseColor.BLACK);
                     var normalFontEleventBlack = new Font(baseFont, 11, Font.NORMAL, BaseColor.BLACK);
                     var boldFontNineBlack = new Font(baseFont, 9, Font.BOLD, BaseColor.BLACK);
@@ -1159,7 +1172,8 @@ namespace ConsoleAppGeneratePDFFile
                     mtable.DefaultCell.Border = Rectangle.NO_BORDER;
 
                     PdfPTable table = new PdfPTable(5);
-                    table.WidthPercentage = 100;
+                    table.WidthPercentage = 30;
+                    table.TotalWidth = 30;
                     PdfPCell cell = new PdfPCell(new Phrase("2"));
                     cell.Colspan = 6;
                     //cell.Rowspan = 2;
@@ -1177,6 +1191,8 @@ namespace ConsoleAppGeneratePDFFile
                                         20, Font.BOLD, BaseColor.BLACK)));
                     cell.Colspan = 2;
                     cell.Padding = 2;
+                    cell.PaddingTop = 5;
+                    cell.PaddingBottom = 5;
                     cell.HorizontalAlignment = 1;
                     table.AddCell(cell);
                     table.AddCell(new PdfPCell(new Phrase($"              Page \n\r              { _report.CurrentPage }/{ _report.TotalPageNumber }",
@@ -1189,17 +1205,16 @@ namespace ConsoleAppGeneratePDFFile
                     cell.MinimumHeight = 18;
                     cell.PaddingBottom = 2;
                     cell.Colspan = 3;
-                    cell.HorizontalAlignment = 1;
                     table.AddCell(cell);
 
                     mtable.AddCell(table);
                     masterDocument.Add(mtable);
+
                     #endregion
 
                     #region -- Duplicata --
                     var docFooter = new Paragraph();
-                    var footerFont = FontFactory.GetFont(FontFactory.HELVETICA_OBLIQUE, 42f, BaseColor.LIGHT_GRAY);
-                    docFooter.Font = footerFont;
+                    docFooter.Font = FontFactory.GetFont(FontFactory.HELVETICA_OBLIQUE, 42f, BaseColor.LIGHT_GRAY);
                     docFooter.Add("\n\r");
                     docFooter.Add(new Chunk("DUPLICATA"));
                     docFooter.Alignment = Element.ALIGN_RIGHT;
@@ -1207,6 +1222,7 @@ namespace ConsoleAppGeneratePDFFile
                     #endregion
 
                     #region -- Set first line  --
+                    #region -- Left --
                     PdfPCell pdfPCell = new PdfPCell();
                     PdfPTable table0 = new PdfPTable(2);
                     table0 = new PdfPTable(1);
@@ -1231,34 +1247,29 @@ namespace ConsoleAppGeneratePDFFile
                     pdfPCell.HorizontalAlignment = Element.ALIGN_CENTER;
                     pdfPCell.VerticalAlignment = Element.ALIGN_MIDDLE;
                     table0.AddCell(dateParagraph);
+                    
+                    PdfPTable headerRightTable = new PdfPTable(2);
+                    headerRightTable = new PdfPTable(1);
+                    headerRightTable.TotalWidth = 165;
+                    headerRightTable.AddCell(pdfPCell);
+                    headerRightTable.WriteSelectedRows(0, -1, 200, 670, pdfContentByte);
+                    #endregion
 
-                    PdfPTable table10 = new PdfPTable(2);
-                    table10 = new PdfPTable(1);
-                    table10.TotalWidth = 165;
-                    table10.AddCell(pdfPCell);
-                    table10.WriteSelectedRows(0, -1, 200, 670, pdfContentByte);
-                    pdfPCell = new PdfPCell(new Phrase("Destinataire", boldFontEleventBlack))
-                    {
-                        VerticalAlignment = Element.ALIGN_MIDDLE,
-                        HorizontalAlignment = Element.ALIGN_CENTER,
-                        BorderWidth = 1
-                    };
-                    pdfPCell.MinimumHeight = 35;
-
-                    //PdfContentByte pdfContentByte30 = pdfContentByte;
-                    PdfPTable table30 = new PdfPTable(1);
-                    table30.TotalWidth = 190;
-
+                    #region -- Destinataire Right --
+                    PdfPTable headerRightSubTable = new PdfPTable(1);
+                    headerRightSubTable.TotalWidth = 190;
                     PdfPTable sTable30 = new PdfPTable(2);
                     pdfPCell = new PdfPCell();
+                    pdfPCell.MinimumHeight = 40;
+                    pdfPCell.Padding = 5;
                     Paragraph paragraph30 = new Paragraph
                         {
-                            new Phrase("Destinataire", boldFontEleventBlack)
+                            new Phrase("Destinataire\n", boldFontEleventBlack)
                         };
                     pdfPCell.HorizontalAlignment = Element.ALIGN_RIGHT;
                     pdfPCell.AddElement(paragraph30);
                     sTable30.AddCell(pdfPCell);
-                    table30.AddCell(paragraph30);
+                    headerRightSubTable.AddCell(paragraph30);
 
                     pdfPCell = new PdfPCell();
                     paragraph30 = new Paragraph();
@@ -1268,8 +1279,10 @@ namespace ConsoleAppGeneratePDFFile
                     pdfPCell.AddElement(paragraph30);
                     paragraph30.SetLeading(2.8f, 1.2f);
                     sTable30.AddCell(pdfPCell);
-                    table30.AddCell(paragraph30);
-                    table30.WriteSelectedRows(0, -1, 385, 670, pdfContentByte);
+                    headerRightSubTable.AddCell(paragraph30);
+                    headerRightSubTable.WriteSelectedRows(0, -1, 385, 670, pdfContentByte);
+                    #endregion
+
                     #endregion
 
                     #region -- Second line --
@@ -1302,15 +1315,16 @@ namespace ConsoleAppGeneratePDFFile
 
                     // -- Draw horizontal line. --
                     Paragraph firstLineSeparator = new Paragraph(new Chunk(lineSeparator));
-                    firstLineSeparator.SpacingBefore = 205f;
+                    firstLineSeparator.SpacingBefore = 210f;
                     masterDocument.Add(firstLineSeparator);
                     
-                    PdfContentByte contentByte = pdfContentByte;
-                    contentByte.SetLineWidth(3);
-                    contentByte.MoveTo(22, 14);
-                    contentByte.LineTo(masterDocument.PageSize.Width - 22, 14);
-                    contentByte.SetColorStroke(BaseColor.BLACK);
-                    contentByte.Stroke();
+                    //// -- Trait de fin de prémière page --
+                    //PdfContentByte contentByte = pdfContentByte;
+                    //contentByte.SetLineWidth(3);
+                    //contentByte.MoveTo(22, 14);
+                    //contentByte.LineTo(masterDocument.PageSize.Width - 22, 14);
+                    //contentByte.SetColorStroke(BaseColor.BLACK);
+                    //contentByte.Stroke();
 
                     #region -- Generate Grid --
                     PdfPTable masterTable = new PdfPTable(dataTable.Columns.Count);
@@ -1322,7 +1336,7 @@ namespace ConsoleAppGeneratePDFFile
                     objectTable.HeaderRows = 1;
 
                     // -- Set spacing between gridView and  --
-                    objectTable.SpacingBefore = 10f;
+                    objectTable.SpacingBefore = 7f;
 
                     List<string> columnHeaders = new List<string>();
 
@@ -1341,8 +1355,7 @@ namespace ConsoleAppGeneratePDFFile
                         pdfColumnCell.VerticalAlignment = Element.ALIGN_MIDDLE;
 
                         var columnName = pdfColumnCell.Phrase[0].ToString();
-                        columnHeaders.Add(columnName);
-                                             
+                        columnHeaders.Add(columnName);                                             
 
                         SetColumnAlignment(dataTable, pdfColumnCell, column);
                         pdfColumnCell.BackgroundColor = BaseColor.WHITE;
@@ -1397,82 +1410,100 @@ namespace ConsoleAppGeneratePDFFile
                     royalFeeTotalMasterTable.TotalWidth = 400;
                     PdfPTable royalFeeTotalTable = new PdfPTable(4);
 
-                    PdfPCell royalFeeTotalCell = new PdfPCell(new Phrase(""));
-                    royalFeeTotalCell.Border = Rectangle.NO_BORDER;
-                    royalFeeTotalCell.BorderColor = BaseColor.WHITE;
-                    royalFeeTotalTable.AddCell(royalFeeTotalCell);
-                    royalFeeTotalCell = new PdfPCell(new Phrase("HT", boldFontNineBlack));
+                    PdfPCell firstRoyalFeeTotalCell = new PdfPCell(new Phrase("NOT Texte here", noneFontOneWhite));
+                    firstRoyalFeeTotalCell.BorderColor = BaseColor.WHITE;
+                    firstRoyalFeeTotalCell.Border = 5;
+                    royalFeeTotalTable.AddCell(firstRoyalFeeTotalCell);
+                    PdfPCell royalFeeTotalCell = new PdfPCell(new Phrase("HT", boldFontNineBlack));
                     royalFeeTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
                     royalFeeTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    royalFeeTotalCell.MinimumHeight = 20;
                     royalFeeTotalTable.AddCell(royalFeeTotalCell);
+
                     royalFeeTotalCell = new PdfPCell(new Phrase("TVA 20,00", boldFontNineBlack));
                     royalFeeTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
                     royalFeeTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    royalFeeTotalCell.MinimumHeight = 20;
                     royalFeeTotalTable.AddCell(royalFeeTotalCell);
 
                     royalFeeTotalCell = new PdfPCell(new Phrase("TTC", boldFontNineBlack));
                     royalFeeTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
                     royalFeeTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    royalFeeTotalCell.MinimumHeight = 20;
                     royalFeeTotalTable.AddCell(royalFeeTotalCell);
+
                     royalFeeTotalCell = new PdfPCell(new Phrase("Total du relevé", boldFontNineBlack));
                     royalFeeTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
                     royalFeeTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    royalFeeTotalCell.MinimumHeight = 20;
                     royalFeeTotalTable.AddCell(royalFeeTotalCell);
+
                     royalFeeTotalCell = new PdfPCell(new Phrase($"{ _report.HtMontant }", boldFontNineBlack));
                     royalFeeTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
                     royalFeeTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    royalFeeTotalCell.MinimumHeight = 20;
                     royalFeeTotalTable.AddCell(royalFeeTotalCell);
 
                     royalFeeTotalCell = new PdfPCell(new Phrase($"{ _report.TVA }", boldFontNineBlack));
                     royalFeeTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
                     royalFeeTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    royalFeeTotalCell.MinimumHeight = 20;
                     royalFeeTotalTable.AddCell(royalFeeTotalCell);
+
                     royalFeeTotalCell = new PdfPCell(new Phrase($"{ _report.TTCMontant }", boldFontNineBlack));
                     royalFeeTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
                     royalFeeTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                    royalFeeTotalCell.MinimumHeight = 20;
                     royalFeeTotalTable.AddCell(royalFeeTotalCell);
-                    royalFeeTotalTable.HorizontalAlignment = Element.ALIGN_LEFT;
-
+                    
                     PdfPCell royalFeeTotalMasterCell = new PdfPCell(royalFeeTotalTable);
 
                     royalFeeTotalMasterTable.AddCell(royalFeeTotalMasterCell);
-                    royalFeeTotalMasterTable.WriteSelectedRows(0, -1, 15, 110, pdfContentByte);
+                    royalFeeTotalMasterTable.WriteSelectedRows(0, -1, 17, 122, pdfContentByte);
                     #endregion
 
                     // -- Draw horizontal line. --
                     Paragraph secondLineSeparator = new Paragraph(new Chunk(lineSeparator));
-                    secondLineSeparator.SpacingAfter = 15f;
+                    secondLineSeparator.SpacingBefore = 15f;
                     masterDocument.Add(secondLineSeparator);
-
-                    //OnEndPageTest(masterWriter, masterDocument);
 
                     //// -- Define footer --
                     OnEndPage(masterWriter, masterDocument, baseFont);
-                    //OnEndPageTest(masterWriter, masterDocument);
-                    
+                   
                     masterDocument.Close();
                     masterStream.Close();
                     masterWriter.Close();
+                    
+                    result = true;
+
+                    stopwatch.Stop();
+                    TimeSpan stopwatchElapsed = stopwatch.Elapsed;
+                    //Console.WriteLine("TEMPS MIS pour générer un PDF " + Convert.ToInt32(stopwatchElapsed.TotalMilliseconds));
 
                     Process.Start(fullPdfPath);
                 }
             }
             catch (DocumentException de)
             {
+                result = false;
                 throw de;
             }
             catch (IOException ioe)
             {
+                result = false;
                 throw ioe;
             }
             catch (Exception exception)
             {
+                result = false;
                 Console.WriteLine(exception.ToString());
             }
             finally
             {
 
             }
+
+            return result;
         }
 
         #region -- Set Header and Footer --
@@ -1484,57 +1515,12 @@ namespace ConsoleAppGeneratePDFFile
         /// <param name="baseFont"></param>
         public static void OnEndPage(PdfWriter writer, Document document, BaseFont baseFont)
         {
-            #region MyRegion
-            //PdfPTable table = new PdfPTable(1);
-            //table.TotalWidth = 70;
-            //table.TotalWidth = document.PageSize.Width - document.LeftMargin - document.RightMargin;
-            //PdfPTable table2 = new PdfPTable(1);
+            PdfPTable endPageTable = new PdfPTable(1);
+           
+            endPageTable.TotalWidth = 70;
+            endPageTable.TotalWidth = document.PageSize.Width - document.LeftMargin - document.RightMargin;
+            PdfPTable table2 = new PdfPTable(1);
 
-            //List<string> footerTextList = new List<string>()
-            //{
-            //    "5 quai de Dion Bouton - 92816 Puteaux Cedex",
-            //    "Tél 01 40 99 21 21 - Fax 01 40 99 80 30",
-            //    "Société Anonyme au capital de 555.112.61€",
-            //    "R.C. Nantère B 332 403 997 - TVA Intra FR1133240397",
-            //    "Mediaperfomances"
-            //};
-
-            //PdfPCell cell2 = null;
-            //foreach (var footerText in footerTextList)
-            //{
-            //    cell2 = new PdfPCell(new Phrase(footerText, new Font(baseFont, 9, Font.NORMAL, BaseColor.BLACK)));
-            //    table2.AddCell(cell2);
-            //}
-
-            //cell2.Border = 0;
-            //cell2.BorderColor = BaseColor.WHITE;
-            //table2.DefaultCell.Border = Rectangle.NO_BORDER;
-            //PdfPCell cell = new PdfPCell(table2);
-            //cell.BorderColor = BaseColor.WHITE;
-            //table.AddCell(cell);
-            //table.DefaultCell.Border = 0;
-
-            //table.WriteSelectedRows(0, -1, 15, 70, writer.DirectContent); 
-            #endregion
-
-            #region -- Save No Ok --
-            /*
-            PdfContentByte cb = writer.DirectContent;
-            ColumnText ct = new ColumnText(cb);
-            ct.Alignment = Element.ALIGN_JUSTIFIED;
-            cb.BeginText();
-            cb.SetFontAndSize(BaseFont.CreateFont(BaseFont.TIMES_ROMAN, BaseFont.CP1252, BaseFont.NOT_EMBEDDED), 10.0f);
-            cb.SetTextMatrix(document.LeftMargin, document.BottomMargin);
-
-            ct.SetSimpleColumn(100, 100, 200, 200);
-            
-            //var table = new PdfPTable(2);
-            //cb.ShowText("000000000000000000\n\r\n\r");
-            //cb.ShowText("000000000000000000\n\r");
-            //cb.ShowText("000000000");
-            //cb.NewlineShowText("498745454545");
-
-            StringBuilder sb = new StringBuilder();
             List<string> footerTextList = new List<string>()
             {
                 "5 quai de Dion Bouton - 92816 Puteaux Cedex",
@@ -1544,80 +1530,21 @@ namespace ConsoleAppGeneratePDFFile
                 "Mediaperfomances"
             };
 
-            //for (int i = 1; i < footerTextList.Count; i++)
-            //{
-            //    ct.AddText(new Phrase(sb.Append(footerTextList[i]).ToString()));
-            //    //ct.AddText(Chunk.NEWLINE);
-            //    ct.Go();
-            //}
-
-            foreach (string text in footerTextList)
+            PdfPCell cell2 = null;
+            foreach (var footerText in footerTextList)
             {
-                ct.AddText(new Phrase(sb.Append(text).ToString()));
-                ct.Go();
+                cell2 = new PdfPCell(new Phrase(footerText, new Font(baseFont, 8, Font.NORMAL, BaseColor.BLACK)));
+                cell2.Border = Rectangle.NO_BORDER;
+                table2.AddCell(cell2);
             }
 
-            //ct.AddElement(table);
-            //ct.Go();
-            cb.EndText();
-            */
-            #endregion
-
-            #region -- Simple way --
-            PdfContentByte cb = writer.DirectContent;
-            cb.SetTextMatrix(document.LeftMargin, document.BottomMargin);
-            cb.SetLineWidth(150);
-            cb.SetFontAndSize(BaseFont.CreateFont(BaseFont.TIMES_ROMAN,
-                BaseFont.CP1252,
-                BaseFont.NOT_EMBEDDED),
-                8.0f);
-
-            ColumnText ct = new ColumnText(cb);
-            //ct.Alignment = Element.ALIGN_CENTER;
-
-            List<string> footerTextList = new List<string>
-            {
-                "24 quai Gallieni - 92156 SURESNES CEDEX \n",
-                "Tél 01 40 99 21 21 - Fax 01 40 99 80 30 \n",
-                "Société par action simplifié au capital de 555.112.61€uro \n",
-                "R.C. natèrre B 332 403 997 - TVA Intra FR1133240397 \n",
-                "Madiaperformances"
-            };
-
-            cb.BeginText();
-            foreach (string text in footerTextList)
-            {
-                cb.ShowText(text);
-            }
-
-            cb.EndText();
-            #endregion
-        }
-
-        public static void OnEndPageTest(PdfWriter writer, Document document)
-        {
-            PdfPTable table = new PdfPTable(1);
-            //table.WidthPercentage = 100; //PdfPTable.writeselectedrows below didn't like this
-            table.TotalWidth = document.PageSize.Width - document.LeftMargin - document.RightMargin; //this centers [table]
-            PdfPTable table2 = new PdfPTable(2);
-
-            //logo
-            PdfPCell cell2 = new PdfPCell(new Phrase("Image.GetInstance(@C:\\path\to\file.gif)"));
-            cell2.Colspan = 2;
-            table2.AddCell(cell2);
-
-            ////title
-            //cell2 = new PdfPCell(new Phrase("\nTITLE", new Font(Font.HELVETICA, 16, Font.BOLD | Font.UNDERLINE)));
-            cell2.HorizontalAlignment = Element.ALIGN_CENTER;
-            cell2.Colspan = 2;
-            table2.AddCell(cell2);
-
+            table2.DefaultCell.Border = Rectangle.NO_BORDER;
             PdfPCell cell = new PdfPCell(table2);
-            table.AddCell(cell);
-
-            table.WriteSelectedRows(0, -1, document.LeftMargin, document.PageSize.Height - 36, writer.DirectContent);
+            cell.BorderColor = BaseColor.WHITE;
+            endPageTable.AddCell(cell);
+            endPageTable.WriteSelectedRows(0, -1, 15, 70, writer.DirectContent);
         }
-
+        
         public static void OnHeaderPage(PdfWriter writer, Document document)
         {
             PdfContentByte pdfContentByte = writer.DirectContent;
@@ -1741,8 +1668,7 @@ namespace ConsoleAppGeneratePDFFile
         public decimal TVA { get; set; } = 106.67m;
         public decimal TTCMontant { get; set; } = 640.01m;
     }
-
-
+    
     public class MyPageHeader : PdfPageEventHelper
     {
         //PdfPTable header = new PdfPTable(3);

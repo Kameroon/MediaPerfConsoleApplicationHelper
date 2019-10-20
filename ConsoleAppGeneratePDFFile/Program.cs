@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Tools;
 
@@ -22,8 +23,68 @@ namespace ConsoleAppGeneratePDFFile
             "E2-MKI-ROBOT", 
             "hiltisql0234");
 
+        #region -- Async method --
+        static int CountCharacters()
+        {
+            int count = 0;
+            string pdfPath = @"C:\Users\Sweet Family\Desktop\PdfFilesPath\text.pdf";
+
+            using (StreamReader streamReader = new StreamReader(pdfPath))
+            {
+                string content = streamReader.ReadToEnd();
+                count = content.Length;
+                Thread.Sleep(5000);
+            }
+            
+            return count;
+        }
+
+        static async void Run2Methods()
+        {
+            Task<int> task = new Task<int>(CountCharacters);
+            task.Start();
+
+            Console.WriteLine("Begin create PDF File !");
+            var result = await task;
+
+            Console.WriteLine($"End create PDF File ! \n\r Result : { result }");
+        }
+
+        static async Task<bool> CallCreatePDFFile(DataTable dataTable, string pdfPath)
+        {
+            var result = false;
+            try
+            {
+                Console.WriteLine("Begin create PDF File !");
+
+                result = await Task.Run(() => Manager.CreatePDFV2(dataTable, pdfPath));
+               
+                Console.WriteLine("End create PDF File !");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return result;
+        }
+
+        private void RunAsync()
+        {
+            string param = "Hi";
+            Task.Run(() => MethodWithParameter(param));
+        }
+
+        private void MethodWithParameter(string param)
+        {
+            //Do stuff
+        }
+        #endregion
+
         static void Main(string[] args)
         {
+
+
 
             var authors = GetAuthors();
 
@@ -51,8 +112,17 @@ namespace ConsoleAppGeneratePDFFile
             ////  - ************************************* -
             //PDFManagerV1.ADDPdf(pdfPath);
 
-            Manager.CreatePDFV2(dateTable, pdfPath);
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+            var res = Manager.CreatePDFV2(dateTable, pdfPath);
+            stopwatch.Stop();
+            TimeSpan stopwatchElapsed = stopwatch.Elapsed;
+            Console.WriteLine("TEMPS MIS pour générer un PDF SYNC " + Convert.ToInt32(stopwatchElapsed.TotalMilliseconds));
 
+            //stopwatch.Start();
+            //Task task = CallCreatePDFFile(dateTable, pdfPath);
+            //TimeSpan stopwatchElapsed = stopwatch.Elapsed;
+            //Console.WriteLine("TEMPS MIS pour générer un PDF ASYNC " + Convert.ToInt32(stopwatchElapsed.TotalMilliseconds));
 
             //TestPDF.ManipulatePdf(pdfPath + "\\test.pdf", @"C:\Users\Sweet Family\Desktop\PdfFilesPath");
 
@@ -129,6 +199,8 @@ namespace ConsoleAppGeneratePDFFile
             #endregion
 
             Console.WriteLine("");
+
+            //Console.ReadKey();
         }
 
         #region -- SQL Methods --
@@ -485,7 +557,6 @@ namespace ConsoleAppGeneratePDFFile
             }
         }
 
-
         private static void CreatePDF(string path)
         {
             try
@@ -638,11 +709,106 @@ namespace ConsoleAppGeneratePDFFile
                 "Mastering WCF",
                 true,
                 date));
-           
+            authorList.Add(new Author("Mahesh Chand",
+               35,
+               "Graphics Programming with GDI+",
+               true,
+               date));
+            authorList.Add(new Author("Mahesh Chand",
+               35,
+               "A Prorammer's Guide to ADO.NET",
+               true,
+               date));
+            authorList.Add(new Author("Neel Beniwal",
+                18,
+                "Graphics Development with C#",
+                false,
+                date));
+            authorList.Add(new Author("Praveen Kumar",
+                28,
+                "Mastering WCF",
+                true,
+                date));
+            authorList.Add(new Author("Mahesh Chand",
+                35,
+                "Graphics Programming with GDI+",
+                true,
+                date));
+            authorList.Add(new Author("Raj Kumar",
+                30,
+                "Building Creative Systems",
+                false,
+                date));
+            authorList.Add(new Author("Neel Beniwal",
+               18,
+               "Graphics Development with C#",
+               false,
+               date));
+            authorList.Add(new Author("Praveen Kumar",
+                28,
+                "Mastering WCF",
+                true,
+                date));
+            authorList.Add(new Author("Mahesh Chand",
+                35,
+                "A Prorammer's Guide to ADO.NET",
+                true,
+                date));
+            authorList.Add(new Author("Neel Beniwal",
+                18,
+                "Graphics Development with C#",
+                false,
+                date));
+            authorList.Add(new Author("Praveen Kumar",
+                28,
+                "Mastering WCF",
+                true,
+                date));
+            authorList.Add(new Author("Mahesh Chand",
+               35,
+               "Graphics Programming with GDI+",
+               true,
+               date));
+            authorList.Add(new Author("Mahesh Chand",
+               35,
+               "A Prorammer's Guide to ADO.NET",
+               true,
+               date));
+            authorList.Add(new Author("Neel Beniwal",
+                18,
+                "Graphics Development with C#",
+                false,
+                date));
+            authorList.Add(new Author("Praveen Kumar",
+                28,
+                "Mastering WCF",
+                true,
+                date));
+            authorList.Add(new Author("Mahesh Chand",
+                35,
+                "Graphics Programming with GDI+",
+                true,
+                date));
+            authorList.Add(new Author("Raj Kumar",
+                30,
+                "Building Creative Systems",
+                false,
+                date));
+            authorList.Add(new Author("Neel Beniwal",
+               18,
+               "Graphics Development with C#",
+               false,
+               date));
+            authorList.Add(new Author("Praveen Kumar",
+                28,
+                "Mastering WCF",
+                true,
+                date));
+
+
             return authorList;
         }
-
-
+        
         private static DataTable GetTable()
         {
             //
