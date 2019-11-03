@@ -1,11 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ConsoleAppGeneratePDFFile
+namespace ConsoleAppITextSharpPDF.DataAccess
 {
+    public interface IAuthor
+    {
+        int Age { get; set; }
+        string BookTitle { get; set; }
+        bool IsMVP { get; set; }
+        string Name { get; set; }
+        DateTime PublishedDate { get; set; }
+    }
+
     public class Author : IAuthor
     {
         private string name;

@@ -1111,7 +1111,7 @@ namespace ConsoleAppGeneratePDFFile
         /// </summary>
         /// <param name="dataTable"></param>
         /// <param name="repositoryPath"></param>
-        public static bool CreatePDFV2(DataTable dataTable, string repositoryPath)
+        public static bool CreatePDFV2(DataTable dataTable, string repositoryPath, int num)
         {
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
@@ -1124,7 +1124,7 @@ namespace ConsoleAppGeneratePDFFile
             imgPath = @"C:\Users\Sweet Family\Desktop\logo.jpg";
             var widthPercentage = 96;
 
-            fileName = string.Format("{0}.pdf", fileCreationDatetime.ToString(@"yyyyMMdd") + "_" + fileCreationDatetime.ToString(@"HHmmss" + ".pdf"));
+            fileName = string.Format(@"\{0}.pdf", fileCreationDatetime.ToString(@"yyyyMMdd") + "_" + num + "_" + fileCreationDatetime.ToString(@"HHmmss" + ".pdf"));
             string fullPdfPath = repositoryPath + fileName;
 
             if (File.Exists(fullPdfPath))

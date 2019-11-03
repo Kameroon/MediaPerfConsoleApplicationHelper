@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Report>
+  <Header>
+    <Date>Sep-11-2012</Date>
+    <Patient_ID>P001</Patient_ID>
+    <PatientName>Brahma Acharya</PatientName>
+    <Address>BBSR</Address>
+    <Contact_No>99372 85710</Contact_No>
+    <DOB>Mar-26-2012</DOB>
+    <Sex>Male</Sex>
+    <Height>65 inches</Height>
+    <Weight>75 Kg</Weight>
+    <Blood_Pressure>120/80 mm Hg</Blood_Pressure>
+  </Header>
+  <Tests>
+    <Test ID = "01">
+      <Field_Name>Fasting Blood Sugar</Field_Name>
+      <Field_Value>85.0</Field_Value>
+      <Unit>mg/dl</Unit>
+      <Normal_Range>70.0 - 110.0</Normal_Range>
+    </Test>
+    <Test ID = "02">
+      <Field_Name>S. Urea</Field_Name>
+      <Field_Value>26.0</Field_Value>
+      <Unit>mg/dl</Unit>
+      <Normal_Range>15.0 - 40.0</Normal_Range>
+    </Test>
+    <Test ID = "03">
+      <Field_Name>Eye Color</Field_Name>
+      <Field_Value>Black</Field_Value>
+      <Unit></Unit>
+      <Normal_Range>Black</Normal_Range>
+    </Test>
+  </Tests>
+</Report>

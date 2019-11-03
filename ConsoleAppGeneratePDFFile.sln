@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tools", "Tools\Tools.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hilti.Email", "..\Shared\Email\Hilti.Email\Hilti.Email\Hilti.Email.csproj", "{DBB2DF07-394E-4A5C-9F60-59A6F2ADCE4F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleAppITextSharpPDF", "ConsoleAppITextSharpPDF\ConsoleAppITextSharpPDF.csproj", "{9B1F62C2-0DDC-44B8-85F1-D0C0C1914F8B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,14 @@ Global
 		{DBB2DF07-394E-4A5C-9F60-59A6F2ADCE4F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DBB2DF07-394E-4A5C-9F60-59A6F2ADCE4F}.Release|x86.ActiveCfg = Release|x86
 		{DBB2DF07-394E-4A5C-9F60-59A6F2ADCE4F}.Release|x86.Build.0 = Release|x86
+		{9B1F62C2-0DDC-44B8-85F1-D0C0C1914F8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B1F62C2-0DDC-44B8-85F1-D0C0C1914F8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B1F62C2-0DDC-44B8-85F1-D0C0C1914F8B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{9B1F62C2-0DDC-44B8-85F1-D0C0C1914F8B}.Debug|x86.Build.0 = Debug|Any CPU
+		{9B1F62C2-0DDC-44B8-85F1-D0C0C1914F8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B1F62C2-0DDC-44B8-85F1-D0C0C1914F8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B1F62C2-0DDC-44B8-85F1-D0C0C1914F8B}.Release|x86.ActiveCfg = Release|Any CPU
+		{9B1F62C2-0DDC-44B8-85F1-D0C0C1914F8B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

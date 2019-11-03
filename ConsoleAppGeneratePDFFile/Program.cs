@@ -1,16 +1,21 @@
-﻿using DataAccess;
+﻿using Dapper;
+using DataAccess;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using MigraDoc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using Tools;
 
 namespace ConsoleAppGeneratePDFFile
@@ -24,100 +29,214 @@ namespace ConsoleAppGeneratePDFFile
             "hiltisql0234");
 
         #region -- Async method --
-        static int CountCharacters()
+        
+        private void MethodWithParameter(DataTable dataTable)
         {
-            int count = 0;
-            string pdfPath = @"C:\Users\Sweet Family\Desktop\PdfFilesPath\text.pdf";
-
-            using (StreamReader streamReader = new StreamReader(pdfPath))
-            {
-                string content = streamReader.ReadToEnd();
-                count = content.Length;
-                Thread.Sleep(5000);
-            }
             
-            return count;
-        }
 
-        static async void Run2Methods()
+        }
+        #endregion
+
+        #region -- XML --
+        private static void XMLData()
         {
-            Task<int> task = new Task<int>(CountCharacters);
-            task.Start();
+            var doc = new XDocument(new XDeclaration("1.0", "UTF-8", ""),
+                new XElement("CUSTOMER",
+                new XElement("FIRST_NAME", "FirstNameTextBox.Text"),
+                new XElement("LAST_NAME", "LastNameTextBox.Text")
+                ));
 
-            Console.WriteLine("Begin create PDF File !");
-            var result = await task;
+            //var reader = new PdfReader(templateFilename);
+            //var stamper = new PdfStamper(reader, new FileStream(bolFilename, FileMode.Create));
+            //var xml = GenerateXml(); // Above code
+            //var stream = new MemoryStream(UTF8Encoding.Default.GetBytes(xml ?? String.Empty));
 
-            Console.WriteLine($"End create PDF File ! \n\r Result : { result }");
+            //stamper.AcroFields.Xfa.FillXfaForm(stream);
+            //stamper.Close();
         }
 
-        static async Task<bool> CallCreatePDFFile(DataTable dataTable, string pdfPath)
-        {
-            var result = false;
-            try
-            {
-                Console.WriteLine("Begin create PDF File !");
-
-                result = await Task.Run(() => Manager.CreatePDFV2(dataTable, pdfPath));
-               
-                Console.WriteLine("End create PDF File !");
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-
-            return result;
-        }
-
-        private void RunAsync()
-        {
-            string param = "Hi";
-            Task.Run(() => MethodWithParameter(param));
-        }
-
-        private void MethodWithParameter(string param)
-        {
-            //Do stuff
-        }
         #endregion
 
         static void Main(string[] args)
         {
+            //XMLData();
 
+            #region -- HIDE ---
+            #region -- ************** XML **************  --
+            //GetEmployesXml();
+            #endregion
 
+            ////GetData();
+            ;
 
+            #region --   --
             var authors = GetAuthors();
-
-            //foreach (var author in authors)
-            //{
-            //    Console.WriteLine("Author: {0},{1},{2},{3},{4}", 
-            //        author.Name, 
-            //        author.Age, 
-            //        author.BookTitle, 
-            //        author.IsMVP,
-            //        author.PublishedDate);
-            //}
+            string pdfPath = @"C:\Users\Sweet Family\Desktop\PdfFilesPath";
 
             var dateTable = DataTableHelper.ToDataTable<Author>(authors);
 
+
+            DoWork(dateTable);
+            #endregion
+
+            #endregion
+
+            #region -- ************** XML **************  --
+            //GetEmployesXml();
+
+            var thread = new Thread(() =>
+            {
+                Console.WriteLine("Starting download ...");
+                var webClient = new HttpClient();
+                var html = webClient.GetStringAsync("http://angelsix.com/download/solidwords-files");
+                Console.WriteLine("Done download!");
+            });
+            thread.Start();
+
+            thread.Join();
+            Console.WriteLine("Tout est bien ...");
+
+            for (int i = 0; i < 5; i++)
+            {
+                new Thread(() =>
+                {
+                    //var res0 = Manager.CreatePDFV2(dateTable, pdfPath, i);
+
+                }).Start();
+            }
+
+            #endregion
+
+
+            #region --- ********************************** ---
+
+            var query = from row in dateTable.AsEnumerable()
+                        group row by row.Field<string>("Name") into grp
+                        select grp;
+
+            var dataTableGroup = (from row in dateTable.AsEnumerable()
+                                  group row by row.Field<string>("Name") into grp
+                                  select grp.CopyToDataTable()).ToList();
+
+
+            #region -- ************* --
+            var grouped = from table in dateTable.AsEnumerable()
+                          group table by new { placeCol = table["Name"] } into groupby
+                          select new
+                          {
+                              Value = groupby.Key,
+                              ColumnValues = groupby
+                          };
+
+            foreach (var key in grouped)
+            {
+                Console.WriteLine(key.Value.placeCol);
+                Console.WriteLine("---------------------------");
+                foreach (var columnValue in key.ColumnValues)
+                {
+                    Console.WriteLine(columnValue["Name"].ToString());
+                }
+
+                Console.WriteLine();
+            }
+            #endregion
+
+            DataTable dtOutput = new DataTable();
+            //foreach (var item in dataTableGroup)
+            //{
+            //    dtOutput.Rows.Add(item.Rows);
+            //}
+
+            var query3 = (from row in dateTable.AsEnumerable()
+                          group row by row.Field<string>("Name")
+                         into grp
+                          select new
+                          {
+                              grp.Key,
+                              //grp.Key.ProductID,
+                              Quantity = grp.Sum(r => r.Field<int>("Age"))
+                          }).ToList();
+
+
+            var result = dateTable.AsEnumerable()
+                .GroupBy(r => new { Col1 = r["Name"] })
+                .Select(g =>
+                {
+                    var row = dateTable.NewRow();
+
+                    row["Name"] = g.Min(r => r.Field<string>("Name"));
+                    row["Age"] = g.Min(r => r.Field<int>("Age"));
+                    row["IsMVP"] = g.Min(r => r.Field<bool>("IsMVP"));
+                    row["BookTitle"] = g.Min(r => r.Field<string>("BookTitle"));
+                    row["PublishedDate"] = g.Min(r => r.Field<DateTime>("PublishedDate"));
+                    row["Age"] = g.Sum(r => r.Field<int>("Age"));
+
+                    return row;
+                }).CopyToDataTable();
+
+            //LINQToDataTable<Author>(query);
+
+            ;
+
+            /*
+            DataTable dt = new DataTable();
+            dt.Columns.AddRange(new DataColumn[3] { new DataColumn("Id", typeof(int)),
+                    new DataColumn("Name", typeof(string)),
+                    new DataColumn("Country",typeof(string)) });
+            dt.Rows.Add(1, "John Hammond", "United States");
+            dt.Rows.Add(2, "Mudassar Khan", "India");
+            dt.Rows.Add(3, "Suzanne Mathews", "France");
+            dt.Rows.Add(4, "Robert Schidner", "Russia");
+
+            var result = from rows in dt.AsEnumerable()
+                         group rows by new
+                         {
+                             Name = rows["Name"],
+                             Country = rows["Country"]
+                         } into grp
+                         select grp;
+
+            List<DataTable> dts = new List<DataTable>();
+            foreach (var item in result)
+            {
+                dts.Add(item.CopyToDataTable());
+            }
+            */
+            ;
+            #endregion
+
+
             //var dataSet = DataTableHelper.ConvertToDataSet<Author>(authors);
-
-            string pdfPath = @"C:\Users\Sweet Family\Desktop\PdfFilesPath";
-
 
             string _imagePath = "https://ftp.mediaperf.com/img/logo.gif";
             //PDFManagerV1.CreatePdf4(pdfPath, _imagePath);
-
 
             ////  - ************************************* -
             //PDFManagerV1.ADDPdf(pdfPath);
 
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
-            var res = Manager.CreatePDFV2(dateTable, pdfPath);
+
+            //var res = Manager.CreatePDFV2(dateTable, pdfPath);
+
+            //for (int i = 0; i < 15; i++)
+            //{
+            //    Task<int> ts = Task<int>.Run(() =>
+            //    {
+            //        var res0 = Manager.CreatePDFV2(dateTable, pdfPath, i);
+
+            //        return 0;
+            //    });
+
+            //    Task.WhenAll(ts);
+            //}
+
+
             stopwatch.Stop();
             TimeSpan stopwatchElapsed = stopwatch.Elapsed;
             Console.WriteLine("TEMPS MIS pour générer un PDF SYNC " + Convert.ToInt32(stopwatchElapsed.TotalMilliseconds));
+            ;
+            // 141314
 
             //stopwatch.Start();
             //Task task = CallCreatePDFFile(dateTable, pdfPath);
@@ -200,7 +319,8 @@ namespace ConsoleAppGeneratePDFFile
 
             Console.WriteLine("");
 
-            //Console.ReadKey();
+            //Console.ReadKey(); 
+            //#endregion
         }
 
         #region -- SQL Methods --
@@ -829,7 +949,725 @@ namespace ConsoleAppGeneratePDFFile
             table.Rows.Add(21, "Combivent", "Jahanzaib", DateTime.Now);
             table.Rows.Add(100, "Dilantin", "Talha", DateTime.Now);
             return table;
-        } 
+        }
         #endregion
+
+        #region --  --
+        
+        public async Task MultipleSpResultsWithDapper()
+        {
+            // Act
+            using (var conn = new SqlConnection("Data Source=YourDatabase"))
+            {
+                await conn.OpenAsync();
+                var result = await conn.QueryMultipleAsync(
+                    "YourStoredProcedureName",
+                    new { param1 = 1, param2 = 2 },
+                    null, null, CommandType.StoredProcedure);
+
+                // read as IEnumerable<dynamic>
+                var table1 = await result.ReadAsync();
+                var table2 = await result.ReadAsync();
+
+                //// read as typed IEnumerable
+                //var table3 = await result.ReadAsync<Table1>();
+                //var table4 = await result.ReadAsync<Table2>();
+
+                ////Assert
+                //Assert.IsNotEmpty(table1);
+                //Assert.IsNotEmpty(table2);
+                //Assert.IsNotEmpty(table3);
+                //Assert.IsNotEmpty(table4);
+            }
+        }
+
+        public static void UseDapper()
+        {
+            using (IDbConnection db = new SqlConnection("Server=myServer;Trusted_Connection=true"))
+            {
+                db.Open();
+                var result = db.Query<string>("SELECT 'Hello World'").Single();
+                Console.WriteLine(result);
+            }
+        }
+        #endregion
+
+        #region --- TASK ---
+        static void UseTask()
+        {
+            Task task = new Task(() =>
+            {
+                //Parallel.ForEach(datas, pdfData =>
+                //{
+                //    var labOrderInvoices = GetLabOrderInvoices(trans.Practices.fPracticeID, pdfData.TaxInvoiceNumber);
+                //    CreateLabOrderInvoice(PopulateHTML(labOrderInvoices), pdfData.TaxInvoiceNumber);
+
+                //    Console.WriteLine("Processing {0} on thread {1}", pdfData.TaxInvoiceNumber,
+                //                Thread.CurrentThread.ManagedThreadId);
+                //});
+            });
+            task.Start();
+            task.Wait();
+        }
+
+        static void CreateLabOrderInvoice(string html, string invoiceNumber)
+        {
+            try
+            {
+                string strHtml = null;
+                MemoryStream memStream = new MemoryStream();
+
+                strHtml = html;
+
+                string strFileShortName = invoiceNumber + ".pdf";
+                string strFileName = @"~\Invoices\" + strFileShortName;
+                iTextSharp.text.Document docWorkingDocument = new iTextSharp.text.Document(iTextSharp.text.PageSize.A4, 40, 40, 40, 40);
+                StringReader srdDocToString = null;
+
+                try
+                {
+                    PdfWriter pdfWrite = default(PdfWriter);
+
+                    pdfWrite = PdfWriter.GetInstance(docWorkingDocument, new FileStream(strFileName, FileMode.Create));
+                    srdDocToString = new StringReader(strHtml);
+
+                    docWorkingDocument.Open();
+
+                    Image logo = Image.GetInstance(@"~\images\Image_PPNLOGO.jpg");
+                    logo.Alignment = Image.ALIGN_RIGHT;
+
+                    docWorkingDocument.AddTitle("Lab Order Invoice");
+                    docWorkingDocument.Add(logo);
+
+                    //XMLWorkerHelper.GetInstance().ParseXHtml(pdfWrite, docWorkingDocument, srdDocToString);
+                }
+                catch (System.Exception ex)
+                {
+                    throw ex;
+                }
+                finally
+                {
+                    if ((docWorkingDocument != null))
+                    {
+                        docWorkingDocument.Close();
+                    }
+                    if ((srdDocToString != null))
+                    {
+                        srdDocToString.Close();
+                        srdDocToString.Dispose();
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                throw ex;
+            }
+
+        }
+
+
+        #region -- XML --
+        public static void GetEmployesXml()
+        {           
+            XElement xelement = XElement.Load("..\\..\\Employees.xml");
+            var employees = from nm in xelement.Elements("Employee")
+                                 select nm;
+
+            //var emplDataTable = XmlParser.BuildDataTableFromXml("My_Table", "xelement");
+
+            var employeeFemale = from nm in xelement.Elements("Employee")
+                       where (string)nm.Element("Sex") == "Female"
+                       select nm;
+            Console.WriteLine("Details of Female Employees:");
+            foreach (XElement xEle in employeeFemale)
+                Console.WriteLine(xEle);
+
+            var employeeMale = from nm in xelement.Elements("Employee")
+                                 where (string)nm.Element("Sex") == "Male"
+                               select nm;
+            Console.WriteLine("Details of Female Employees:");
+            foreach (XElement xEle in employeeMale)
+                Console.WriteLine(xEle);
+
+            var stCnt = from address in xelement.Elements("Employee")
+                        where (string)address.Element("Address").Element("State") == "CA"
+                        select address;
+            Console.WriteLine("No of Employees living in CA State are {0}", stCnt.Count());
+
+                        
+            // http://www.colome.org/linq-xml-group-c-alternatives/
+            
+
+            //// -- Convert Xml to DataTable --
+            //ToDataTable(xelement);
+
+        }
+
+
+        private static void DoWork(DataTable dataTable)
+        {
+            // https://www.c-sharpcorner.com/forums/creating-pdf-using-c-sharp-xml-and-itextsharp
+            //https://stackoverflow.com/questions/19566237/how-can-convert-xml-to-pdf-using-itextsharp
+
+            XElement xelement = XElement.Load("..\\..\\Employees.xml");
+            //var employees = (from nm in xelement.Elements("Employee")
+            //                select nm).ToList();
+
+            ////Sample XML
+            //var xml = employees;
+
+            //File to write to
+            var testFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "TEST.pdf");
+
+            //Standard PDF creation, nothing special here
+            using (var fs = new FileStream(testFile, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                var doc0 = new Document(PageSize.A4, 5f, 5f, 5f, 5f);
+                using (var doc = new Document())
+                {
+                    using (var writer = PdfWriter.GetInstance(doc, fs))
+                    {
+                        doc.Open();
+
+                        #region --XML  Save !!! --
+                        ////Count the columns
+                        //var columnCount = xml.Root.Elements("Employee").First().Nodes().Count();
+
+                        ////Create a table with one column for every child node of <cd>
+                        //var t = new PdfPTable(columnCount);
+
+                        ////Flag that the first row should be repeated on each page break
+                        //t.HeaderRows = 1;
+
+                        ////Loop through the first item to output column headers
+                        //foreach (var N in xml.Root.Elements("cd").First().Elements())
+                        //{
+                        //    t.AddCell(N.Name.ToString());
+                        //}
+
+                        ////Loop through each CD row (this is so we can call complete later on)
+                        //foreach (var CD in xml.Root.Elements())
+                        //{
+                        //    //Loop through each child of the current CD. Limit the number of children to our initial count just in case there are extra nodes.
+                        //    foreach (var N in CD.Elements().Take(columnCount))
+                        //    {
+                        //        t.AddCell(N.Value);
+                        //    }
+                        //    //Just in case any rows have too few cells fill in any blanks
+                        //    t.CompleteRow();
+                        //}
+
+                        ////Add the table to the document
+                        //doc.Add(t);
+
+                        #endregion
+
+                        // https://www.mikesdotnetting.com/article/86/itextsharp-introducing-tables
+
+                        #region -- Simulation Dynamic table --
+                        PdfPTable table0 = new PdfPTable(4);
+
+                        PdfPCell cell0 = new PdfPCell(new Phrase("No"));
+                        cell0.Colspan = 0;
+                        cell0.HorizontalAlignment = 0; //0=Left, 1=Centre, 2=Right
+                        cell0.VerticalAlignment = Element.ALIGN_MIDDLE;
+                        table0.AddCell(cell0);
+
+                        cell0 = new PdfPCell(new Phrase("Campagne"));
+                        cell0.Colspan = 0;
+                        cell0.MinimumHeight = 30;
+                        cell0.VerticalAlignment = Element.ALIGN_MIDDLE;
+                        cell0.HorizontalAlignment = 0; //0=Left, 1=Centre, 2=Right
+                        table0.AddCell(cell0);
+
+                        cell0 = new PdfPCell(new Phrase("Du"));
+                        cell0.Colspan = 0;
+                        cell0.HorizontalAlignment = 1; //0=Left, 1=Centre, 2=Right
+                        cell0.VerticalAlignment = Element.ALIGN_MIDDLE;
+                        table0.AddCell(cell0);
+
+                        cell0 = new PdfPCell(new Phrase("Au"));
+                        cell0.Colspan = 0;
+                        cell0.HorizontalAlignment = 1; //0=Left, 1=Centre, 2=Right
+                        cell0.VerticalAlignment = Element.ALIGN_MIDDLE;
+                        table0.AddCell(cell0);
+
+                        table0.AddCell("Col 1 Row 0");
+                        table0.AddCell("Col 2 Row 0");
+                        table0.AddCell("Col 3 Row 0");
+                        table0.AddCell("Col 4 Row 0");
+
+                        table0.AddCell("Col 1 Row 1");
+                        table0.AddCell("Col 2 Row 1");
+                        table0.AddCell("Col 3 Row 1");
+                        table0.AddCell("Col 4 Row 1");
+
+                        table0.AddCell("Col 1 Row 2");
+                        table0.AddCell("Col 2 Row 2");
+                        table0.AddCell("Col 3 Row 2");
+                        table0.AddCell("Col 4 Row 2");
+
+                        PdfPCell cell1 = new PdfPCell(new Phrase("Header spanning 3 columns"));
+                        cell1.Colspan = 2;
+                        cell1.HorizontalAlignment = 2; //0=Left, 1=Centre, 2=Right
+                        table0.AddCell(cell1);
+
+                        table0.AddCell("Col 3 Row 4");
+                        table0.AddCell("Col 4 Row 4");
+
+                        PdfPCell productCell = new PdfPCell(new Phrase("Actishef\n   SubTitle"));
+                        //productCell = new PdfPCell(new Phrase("Actishef"));
+                        productCell.Colspan = 4;
+                        productCell.MinimumHeight = 23;
+                        productCell.Padding = 5;
+                        productCell.HorizontalAlignment = 0; //0=Left, 1=Centre, 2=Right
+                        table0.AddCell(productCell);
+
+                        table0.AddCell("Col 1 Row 5");
+                        table0.AddCell("Col 2 Row 5");
+                        table0.AddCell("Col 3 Row 5");
+                        table0.AddCell("Col 4 Row 5");
+
+                        table0.AddCell("Col 1 Row 6");
+                        table0.AddCell("Col 2 Row 6");
+                        table0.AddCell("Col 3 Row 6");
+                        table0.AddCell("Col 4 Row 6");
+
+                        table0.AddCell("Col 1 Row 7");
+                        table0.AddCell("Col 2 Row 7");
+                        table0.AddCell("Col 3 Row 7");
+                        table0.AddCell("Col 4 Row 7");
+
+                        //doc.Add(table0); 
+                        #endregion
+
+
+                        #region --- Loop dataTable XML ---
+                        PdfPTable tableColumns = new PdfPTable(5);
+
+                        PdfPCell cellColumnHeader = null;
+
+                        //tableColumns.SetWidthPercentage(90f);
+
+                        List<string> columnNames = new List<string>();
+
+                        foreach (DataRow row in dataTable.Rows)
+                        {
+                            foreach (DataColumn column in dataTable.Columns)
+                            {
+                                var colName = column.ToString();
+
+                                string cName = colName;
+                                ;
+
+                                #region MyRegion
+                                if (true)
+                                {
+                                    #region -- Set Columns names --
+                                    if (colName.Contains("Name"))
+                                    {
+                                        columnNames.Add(colName);
+                                        cellColumnHeader = new PdfPCell(new Phrase(colName));
+                                        cellColumnHeader.MinimumHeight = 30;
+                                        cellColumnHeader.HorizontalAlignment = 0; //0=Left, 1=Centre, 2=Right
+                                        cellColumnHeader.VerticalAlignment = Element.ALIGN_MIDDLE;
+                                        tableColumns.AddCell(cellColumnHeader);
+                                    }
+
+                                    if (colName.Contains("Age"))
+                                    {
+                                        cellColumnHeader = new PdfPCell(new Phrase(colName));
+                                        cellColumnHeader.VerticalAlignment = Element.ALIGN_MIDDLE;
+                                        cellColumnHeader.HorizontalAlignment = 0; //0=Left, 1=Centre, 2=Right
+                                        tableColumns.AddCell(cellColumnHeader);
+                                    }
+
+                                    if (colName.Contains("BookTitle"))
+                                    {
+                                        cellColumnHeader = new PdfPCell(new Phrase(colName));
+                                        cellColumnHeader.Colspan = 0;
+                                        cellColumnHeader.HorizontalAlignment = 1; //0=Left, 1=Centre, 2=Right
+                                        cellColumnHeader.VerticalAlignment = Element.ALIGN_MIDDLE;
+                                        tableColumns.AddCell(cellColumnHeader);
+                                    }
+
+                                    if (colName.Contains("IsMVP"))
+                                    {
+                                        cellColumnHeader = new PdfPCell(new Phrase(colName));
+                                        cellColumnHeader.Colspan = 0;
+                                        cellColumnHeader.HorizontalAlignment = 1; //0=Left, 1=Centre, 2=Right
+                                        cellColumnHeader.VerticalAlignment = Element.ALIGN_MIDDLE;
+                                        tableColumns.AddCell(cellColumnHeader);
+                                    }
+
+                                    if (colName.Contains("PublishedDate"))
+                                    {
+                                        cellColumnHeader = new PdfPCell(new Phrase(colName));
+                                        cellColumnHeader.Colspan = 0;
+                                        cellColumnHeader.HorizontalAlignment = 1; //0=Left, 1=Centre, 2=Right
+                                        cellColumnHeader.VerticalAlignment = Element.ALIGN_MIDDLE;
+                                        tableColumns.AddCell(cellColumnHeader);
+                                    }
+                                    #endregion
+                                }
+                                #endregion
+
+                                #region MyRegion
+                                // --  https://stackoverflow.com/questions/12916110/datatable-group-the-result-in-one-row --
+                                var name = row.ItemArray[0].ToString();
+
+                                var variableColumnNames = dataTable.Columns.Cast<DataColumn>()
+                                            .Select(c => c.ColumnName)
+                                            .Except(new[] { "Lastname", "Comment" });
+
+                                var result10 = from r in dataTable.AsEnumerable()
+                                                   //group r by new
+                                                   //{
+                                                   //    Name = r.Field<string>("Name")
+                                                   //} into grp
+                                               group r by r.Field<string>("Name") into grp
+                                               select new
+                                               {
+                                                   Value = grp.Key,
+                                                   //ColumnValues = grp
+
+                                                   Values = variableColumnNames.ToDictionary(
+                                                       columnName => columnName)//,
+                                                       //columnName => grp.Count(r => r.Field<string>(columnName)))
+                                               };
+
+
+                                var result11 = from t1 in dataTable.AsEnumerable()
+                                               group t1 by new
+                                               {
+                                                   Name = t1.Field<string>("Name")//
+                                                   //LastName = t1.Field<String>("LastName"),
+                                                   //Comment = t1.Field<String>("Comment"),
+                                               } into grp
+                                               select new
+                                               {
+                                                   grp.Key.Name,
+                                                   //grp.Key.LastName,
+                                                   //grp.Key.Comment,
+
+                                                   Values = variableColumnNames.ToDictionary(
+                                                       columnName => columnName,
+                                                       columnName => grp.Max(r => r.Field<string>(columnName)))
+                                               };
+
+                                /*
+                                var query = from r in dataTable.AsEnumerable()
+                                            where r.Field<string>("Name") == name
+                                            group r by r.Field<string>(name) into grp
+                                            select grp;
+
+                                var dataTableGroup = (from r in dataTable.AsEnumerable()
+                                                      group r by r.Field<string>(name) into grp
+                                                      select grp.CopyToDataTable()).ToList();
+
+
+                                var grouped = from table in dataTable.AsEnumerable()
+                                              group table by new { placeCol = table[name] } into groupby
+                                              select new
+                                              {
+                                                  Value = groupby.Key,
+                                                  ColumnValues = groupby
+                                              };
+                                */
+
+
+                                //if (name.Contains(cName))
+                                //{
+                                tableColumns.AddCell(row.ItemArray[0].ToString());
+                                tableColumns.AddCell(row.ItemArray[1].ToString());
+                                tableColumns.AddCell(row.ItemArray[2].ToString());
+                                tableColumns.AddCell(row.ItemArray[3].ToString());
+                                tableColumns.AddCell(row.ItemArray[4].ToString());
+                                #endregion
+                            }
+                        }
+
+                        #region MyRegion
+                        //for (int k = 0; k < dataTable.Columns.Count; k++)
+                        //{
+                        //    string colName = dataTable.Columns[k].ColumnName;
+
+                        //    #region -- Set Columns names --
+                        //    if (colName.Contains("Name"))
+                        //    {
+                        //        columnNames.Add(colName);
+                        //        cellColumnHeader = new PdfPCell(new Phrase(colName));
+                        //        cellColumnHeader.MinimumHeight = 30;
+                        //        cellColumnHeader.HorizontalAlignment = 0; //0=Left, 1=Centre, 2=Right
+                        //        cellColumnHeader.VerticalAlignment = Element.ALIGN_MIDDLE;
+                        //        tableColumns.AddCell(cellColumnHeader);
+                        //    }
+
+                        //    if (colName.Contains("Age"))
+                        //    {
+                        //        cellColumnHeader = new PdfPCell(new Phrase(colName));
+                        //        cellColumnHeader.VerticalAlignment = Element.ALIGN_MIDDLE;
+                        //        cellColumnHeader.HorizontalAlignment = 0; //0=Left, 1=Centre, 2=Right
+                        //        tableColumns.AddCell(cellColumnHeader);
+                        //    }
+
+                        //    if (colName.Contains("BookTitle"))
+                        //    {
+                        //        cellColumnHeader = new PdfPCell(new Phrase(colName));
+                        //        cellColumnHeader.Colspan = 0;
+                        //        cellColumnHeader.HorizontalAlignment = 1; //0=Left, 1=Centre, 2=Right
+                        //        cellColumnHeader.VerticalAlignment = Element.ALIGN_MIDDLE;
+                        //        tableColumns.AddCell(cellColumnHeader);
+                        //    }
+
+                        //    if (colName.Contains("IsMVP"))
+                        //    {
+                        //        cellColumnHeader = new PdfPCell(new Phrase(colName));
+                        //        cellColumnHeader.Colspan = 0;
+                        //        cellColumnHeader.HorizontalAlignment = 1; //0=Left, 1=Centre, 2=Right
+                        //        cellColumnHeader.VerticalAlignment = Element.ALIGN_MIDDLE;
+                        //        tableColumns.AddCell(cellColumnHeader);
+                        //    }
+
+                        //    if (colName.Contains("PublishedDate"))
+                        //    {
+                        //        cellColumnHeader = new PdfPCell(new Phrase(colName));
+                        //        cellColumnHeader.Colspan = 0;
+                        //        cellColumnHeader.HorizontalAlignment = 1; //0=Left, 1=Centre, 2=Right
+                        //        cellColumnHeader.VerticalAlignment = Element.ALIGN_MIDDLE;
+                        //        tableColumns.AddCell(cellColumnHeader);
+                        //    }
+                        //    #endregion
+
+                        //    //PdfPCell pdfColumnCell = new PdfPCell(new Phrase(dataTable.Columns[k].ColumnName));
+                        //    //pdfColumnCell.HorizontalAlignment = PdfPCell.ALIGN_CENTER;
+                        //    //pdfColumnCell.VerticalAlignment = PdfPCell.ALIGN_CENTER;
+                        //    //pdfColumnCell.BackgroundColor = new BaseColor(51, 102, 102);
+                        //    //tableColumns.AddCell(pdfColumnCell);
+                        //}
+
+                        //string cellVal = null;
+                        //for (int i = 0; i < dataTable.Rows.Count; i++)
+                        //{
+                        //    //JObject eachRowObj = new JObject();
+
+                        //    for (int j = 0; j < dataTable.Columns.Count; j++)
+                        //    {
+                        //        #region --- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ---
+                        //        var cellValue = dataTable.Rows[i][j].ToString();
+                        //        cellVal = cellValue;
+                        //        ;
+
+                        //        var query = from row in dataTable.AsEnumerable()
+                        //                    group row by row.Field<string>("Name") into grp
+                        //                    select grp;  /*).ToList()*/
+
+                        //        //var dat = query["Name"];
+
+                        //        var grouped = (from table in dataTable.AsEnumerable()
+                        //                       group table by new { placeCol = table["Name"] } into groupby
+                        //                       select new
+                        //                       {
+                        //                           Value = groupby.Key,
+                        //                           Sum = groupby.Count(),
+                        //                           ColumnValues = groupby
+                        //                       }).ToList();
+
+
+
+                        //        var result = dataTable.AsEnumerable()
+                        //                     .GroupBy(r => new { Col1 = r["Name"] })
+                        //                     .Select(g =>
+                        //                     {
+                        //                         var row = dataTable.NewRow();
+
+                        //                         row["Name"] = g.Min(r => r.Field<string>("Name"));
+                        //                         row["Age"] = g.Min(r => r.Field<int>("Age"));
+                        //                         row["IsMVP"] = g.Min(r => r.Field<bool>("IsMVP"));
+                        //                         row["BookTitle"] = g.Min(r => r.Field<string>("BookTitle"));
+                        //                         row["PublishedDate"] = g.Min(r => r.Field<DateTime>("PublishedDate"));
+                        //                         row["Age"] = g.Sum(r => r.Field<int>("Age"));
+
+                        //                         return row;
+                        //                     }).CopyToDataTable(); 
+                        //        #endregion
+
+                        //        //eachRowObj.Add(key, value);
+
+                        //        string key = Convert.ToString(dataTable.Columns[j]);
+                        //        string value = Convert.ToString(dataTable.Rows[i].ItemArray[j]);
+
+                        //        if (value.Contains(cellValue))
+                        //        {
+                        //            //tableColumns.AddCell(value);
+                        //            //tableColumns.AddCell(row.ItemArray[1].ToString());
+                        //            //tableColumns.AddCell(row.ItemArray[2].ToString());
+                        //            //tableColumns.AddCell(row.ItemArray[3].ToString());
+                        //            //tableColumns.AddCell(row.ItemArray[4].ToString());
+                        //        }
+
+                        //        PdfPCell pdfColumnCell = new PdfPCell(new Phrase(dataTable.Rows[i][j].ToString()));
+
+                        //        //Align the pdfColumnCell in the center
+                        //        pdfColumnCell.HorizontalAlignment = PdfPCell.ALIGN_CENTER;
+                        //        pdfColumnCell.VerticalAlignment = PdfPCell.ALIGN_CENTER;
+
+                        //        //table.AddCell(pdfColumnCell);
+                        //    }
+                        //} 
+                        #endregion
+                        #endregion
+
+                        float[] widths = new float[] { 20f, 20f, 50f, 20f, 30f };
+                        tableColumns.SetWidths(widths);
+                        doc.Add(tableColumns);
+
+                        doc.Close();
+
+                        Process.Start(testFile);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
+        public static DataTable ToDataTable(XDocument element)
+        {
+            if (element != null)
+            {
+                DataSet ds = new DataSet();
+                string rawXml = element.ToString();
+                ds.ReadXml(new StringReader(rawXml));
+                return ds.Tables[0];
+            }
+            else
+                return null;
+        }
+        #endregion
+        /*    https://stackoverflow.com/questions/5603284/linq-to-xml-groupby
+         * 
+         var data = from acct in chartData.Elements()
+           select new {
+               Summary = (string)acct.Element("Summary"),
+               Comprehensive = (string)acct.Element("Comprehensive"),
+               Currency = (string)acct.Element("Currency"),
+               Balance = (decimal)acct.Element("Balance"),
+           };
+
+var grouped = from acct in data
+              group acct by acct.Summary into g
+              select new {
+                  Summary = g.Key,
+                  Comprehensive = g.First().Comprehensive,
+                  Currency = g.First().Comprehensive,
+                  Balance = g.Sum(),
+              };
+
+var groupData = new XElement("Root",
+     from g in grouped
+     select new XElement("Account",
+             new XElement("Summary", g.Summary),
+             new XElement("Comprehensive", g.Comprehensive),
+             new XElement("Currency", g.Currency),
+             new XElement("Balance", g.Balance.ToString("0.000000"))
+         )
+     );
+         * 
+         * */
+        #endregion
+
+        public static void GetData()
+        {
+
+            string query = @"SELECT TOP 1000 [PersonId]
+                  ,[FirstName]
+                  ,[Adress_Street]
+                  ,[State]
+                  ,[DateAdded]
+                  ,[PersonTypeId]
+                  ,[DateModified]
+              FROM[JunkEFCodeFrist1].[dbo].[People]";
+
+            query += @"SELECT TOP 1000 [CompagnyId]
+                  ,[CompagnyName]
+                  ,[Adress_Street]
+                  ,[State]
+                    FROM[JunkEFCodeFrist1].[dbo].[Compagnies]";
+
+            //string connectionString = @"Data Source=DESKTOP-6DSO6AT\\SQLEXPRESS; Database=JunkEFCodeFrist1; Trusted_Connection=True";
+
+            string connetionString = "Data Source=DESKTOP-6DSO6AT\\SQLEXPRESS; Database=JunkEFCodeFrist1; Trusted_Connection=True";
+
+            //using (var conn = new SqlConnection(Helper.GetConnectionString()))
+            using (var conn = new SqlConnection(connetionString))
+            {
+                using (var data = conn.QueryMultiple(query, null))
+                {
+                    //var totalRecords = data.Read<int>().Single();
+                    var records = data.Read<dynamic>();
+                    var record = data.Read<dynamic>();
+                    //var remaining = totalRecords - records.Count();
+                }
+            }
+        }
+
+
+        #region -- ********************** --
+        public DataTable LINQToDataTable<T>(IEnumerable<T> varlist)
+        {
+            DataTable dtReturn = new DataTable();
+
+            // column names
+            PropertyInfo[] oProps = null;
+
+            if (varlist == null) return dtReturn;
+
+            foreach (T rec in varlist)
+            {
+                // Use reflection to get property names, to create table, Only first time, others will follow
+                if (oProps == null)
+                {
+                    oProps = ((Type)rec.GetType()).GetProperties();
+                    foreach (PropertyInfo pi in oProps)
+                    {
+                        Type colType = pi.PropertyType;
+
+                        if ((colType.IsGenericType) && (colType.GetGenericTypeDefinition()
+                        == typeof(Nullable<>)))
+                        {
+                            colType = colType.GetGenericArguments()[0];
+                        }
+
+                        dtReturn.Columns.Add(new DataColumn(pi.Name, colType));
+                    }
+                }
+
+                DataRow dr = dtReturn.NewRow();
+
+                foreach (PropertyInfo pi in oProps)
+                {
+                    dr[pi.Name] = pi.GetValue(rec, null) == null ? DBNull.Value : pi.GetValue
+                    (rec, null);
+                }
+
+                dtReturn.Rows.Add(dr);
+            }
+            return dtReturn;
+        }
+        #endregion
+    }
+
+    public class Person
+    {
+        public int PersonId { get; set; }
+        public string  FirstName { get; set; }
+        public string Adress_Street { get; set; }
+        public DateTime DateAdded { get; set; }
+        public int  PersonTypeId { get; set; }
+        public DateTime DateModified { get; set; }
     }
 }
