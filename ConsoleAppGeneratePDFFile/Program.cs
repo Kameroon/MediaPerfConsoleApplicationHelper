@@ -1167,6 +1167,9 @@ namespace ConsoleAppGeneratePDFFile
                         #region -- Simulation Dynamic table --
                         PdfPTable table0 = new PdfPTable(4);
 
+                        var font = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD);
+
+                        #region -- Table Header --
                         PdfPCell cell0 = new PdfPCell(new Phrase("No"));
                         cell0.Colspan = 0;
                         cell0.HorizontalAlignment = 0; //0=Left, 1=Centre, 2=Right
@@ -1191,7 +1194,9 @@ namespace ConsoleAppGeneratePDFFile
                         cell0.HorizontalAlignment = 1; //0=Left, 1=Centre, 2=Right
                         cell0.VerticalAlignment = Element.ALIGN_MIDDLE;
                         table0.AddCell(cell0);
+                        #endregion
 
+                        #region -- First table group --
                         table0.AddCell("Col 1 Row 0");
                         table0.AddCell("Col 2 Row 0");
                         table0.AddCell("Col 3 Row 0");
@@ -1207,15 +1212,25 @@ namespace ConsoleAppGeneratePDFFile
                         table0.AddCell("Col 3 Row 2");
                         table0.AddCell("Col 4 Row 2");
 
-                        PdfPCell cell1 = new PdfPCell(new Phrase("Header spanning 3 columns"));
+                        PdfPCell cell1 = new PdfPCell(new Phrase("First total row", font));
                         cell1.Colspan = 2;
                         cell1.HorizontalAlignment = 2; //0=Left, 1=Centre, 2=Right
                         table0.AddCell(cell1);
 
                         table0.AddCell("Col 3 Row 4");
                         table0.AddCell("Col 4 Row 4");
+                        
+                        cell1 = new PdfPCell(new Phrase("Second total row", font));
+                        cell1.Colspan = 2;
+                        cell1.HorizontalAlignment = 2; //0=Left, 1=Centre, 2=Right
+                        table0.AddCell(cell1);
 
-                        PdfPCell productCell = new PdfPCell(new Phrase("Actishef\n   SubTitle"));
+                        table0.AddCell("Col 3 Row 4");
+                        table0.AddCell("Col 4 Row 4");
+                        #endregion
+
+                        #region -- Second table group --
+                        PdfPCell productCell = new PdfPCell(new Phrase("Actishef\n   SubTitle", font));
                         //productCell = new PdfPCell(new Phrase("Actishef"));
                         productCell.Colspan = 4;
                         productCell.MinimumHeight = 23;
@@ -1238,7 +1253,95 @@ namespace ConsoleAppGeneratePDFFile
                         table0.AddCell("Col 3 Row 7");
                         table0.AddCell("Col 4 Row 7");
 
-                        //doc.Add(table0); 
+                        table0.AddCell("Col 1 Row 5");
+                        table0.AddCell("Col 2 Row 5");
+                        table0.AddCell("Col 3 Row 5");
+                        table0.AddCell("Col 4 Row 5");
+
+                        table0.AddCell("Col 1 Row 6");
+                        table0.AddCell("Col 2 Row 6");
+                        table0.AddCell("Col 3 Row 6");
+                        table0.AddCell("Col 4 Row 6");
+
+                        table0.AddCell("Col 1 Row 7");
+                        table0.AddCell("Col 2 Row 7");
+                        table0.AddCell("Col 3 Row 7");
+                        table0.AddCell("Col 4 Row 7");
+
+                        PdfPCell cell2 = new PdfPCell(new Phrase("First total row"));
+                        cell2.Colspan = 2;
+                        cell2.HorizontalAlignment = 2; //0=Left, 1=Centre, 2=Right
+                        table0.AddCell(cell2);
+
+                        table0.AddCell("Col 3 Row 4");
+                        table0.AddCell("Col 4 Row 4");
+
+                        cell1 = new PdfPCell(new Phrase("Second total row"));
+                        cell1.Colspan = 2;
+                        cell1.HorizontalAlignment = 2; //0=Left, 1=Centre, 2=Right
+                        table0.AddCell(cell1);
+
+                        table0.AddCell("Col 3 Row 4");
+                        table0.AddCell("Col 4 Row 4");
+
+                        productCell = new PdfPCell(new Phrase("Actishef\n   SubTitle"));
+                        productCell.Colspan = 4;
+                        productCell.MinimumHeight = 23;
+                        productCell.Padding = 5;
+                        productCell.HorizontalAlignment = 0; //0=Left, 1=Centre, 2=Right
+                        table0.AddCell(productCell);
+                        #endregion
+
+                        #region -- ************************ --
+                        table0.AddCell("Col 1 Row 5");
+                        table0.AddCell("Col 2 Row 5");
+                        table0.AddCell("Col 3 Row 5");
+                        table0.AddCell("Col 4 Row 5");
+
+                        table0.AddCell("Col 1 Row 6");
+                        table0.AddCell("Col 2 Row 6");
+                        table0.AddCell("Col 3 Row 6");
+                        table0.AddCell("Col 4 Row 6");
+
+                        table0.AddCell("Col 1 Row 7");
+                        table0.AddCell("Col 2 Row 7");
+                        table0.AddCell("Col 3 Row 7");
+                        table0.AddCell("Col 4 Row 7");
+
+                        table0.AddCell("Col 1 Row 5");
+                        table0.AddCell("Col 2 Row 5");
+                        table0.AddCell("Col 3 Row 5");
+                        table0.AddCell("Col 4 Row 5");
+
+                        table0.AddCell("Col 1 Row 6");
+                        table0.AddCell("Col 2 Row 6");
+                        table0.AddCell("Col 3 Row 6");
+                        table0.AddCell("Col 4 Row 6");
+
+                        table0.AddCell("Col 1 Row 7");
+                        table0.AddCell("Col 2 Row 7");
+                        table0.AddCell("Col 3 Row 7");
+                        table0.AddCell("Col 4 Row 7");
+
+                        PdfPCell cell3 = new PdfPCell(new Phrase("First total row", font));
+                        cell3.Colspan = 2;
+                        cell3.HorizontalAlignment = 2; //0=Left, 1=Centre, 2=Right
+                        table0.AddCell(cell3);
+
+                        table0.AddCell("Col 3 Row 4");
+                        table0.AddCell("Col 4 Row 4");
+
+                        cell3 = new PdfPCell(new Phrase("Static headline" + Chunk.NEWLINE + "richTextBox1.Text", font));
+                        cell3.Colspan = 2;
+                        cell3.HorizontalAlignment = 2; //0=Left, 1=Centre, 2=Right
+                        table0.AddCell(cell3);
+
+                        table0.AddCell("Col 3 Row 4");
+                        table0.AddCell("Col 4 Row 4");
+                        #endregion                        
+
+                        doc.Add(table0);
+                        
                         #endregion
 
 
@@ -1250,7 +1353,7 @@ namespace ConsoleAppGeneratePDFFile
                         //tableColumns.SetWidthPercentage(90f);
 
                         List<string> columnNames = new List<string>();
-
+                        /*
                         foreach (DataRow row in dataTable.Rows)
                         {
                             foreach (DataColumn column in dataTable.Columns)
@@ -1313,6 +1416,7 @@ namespace ConsoleAppGeneratePDFFile
                                 #endregion
 
                                 #region MyRegion
+                                /*
                                 // --  https://stackoverflow.com/questions/12916110/datatable-group-the-result-in-one-row --
                                 var name = row.ItemArray[0].ToString();
 
@@ -1375,7 +1479,7 @@ namespace ConsoleAppGeneratePDFFile
                                               };
                                 */
 
-
+                                /*
                                 //if (name.Contains(cName))
                                 //{
                                 tableColumns.AddCell(row.ItemArray[0].ToString());
@@ -1383,9 +1487,13 @@ namespace ConsoleAppGeneratePDFFile
                                 tableColumns.AddCell(row.ItemArray[2].ToString());
                                 tableColumns.AddCell(row.ItemArray[3].ToString());
                                 tableColumns.AddCell(row.ItemArray[4].ToString());
+                                */
+                                /*
                                 #endregion
                             }
                         }
+
+                        */
 
                         #region MyRegion
                         //for (int k = 0; k < dataTable.Columns.Count; k++)
@@ -1520,7 +1628,7 @@ namespace ConsoleAppGeneratePDFFile
 
                         float[] widths = new float[] { 20f, 20f, 50f, 20f, 30f };
                         tableColumns.SetWidths(widths);
-                        doc.Add(tableColumns);
+                        //doc.Add(tableColumns);
 
                         doc.Close();
 
@@ -1529,6 +1637,8 @@ namespace ConsoleAppGeneratePDFFile
                 }
             }
         }
+
+        
 
         /// <summary>
         /// 
@@ -1670,4 +1780,91 @@ var groupData = new XElement("Root",
         public int  PersonTypeId { get; set; }
         public DateTime DateModified { get; set; }
     }
+
+    #region -- CLASS --
+	/// <summary>
+    /// 
+    /// </summary>
+    public class DynamicMultilineTextbox : IPdfPCellEvent
+    {
+        private string fieldname;
+
+        public DynamicMultilineTextbox(string name)
+        {
+            fieldname = name;
+        }
+
+        public void CellLayout(PdfPCell cell, Rectangle rectangle, PdfContentByte[] canvases)
+        {
+            Rectangle wreckTangle = new Rectangle(30, 60); // changed from 300, 600
+            PdfWriter writer = canvases[0].PdfWriter;
+            TextField text = new TextField(writer, wreckTangle, fieldname);
+            PdfFormField field = text.GetTextField();
+            writer.AddAnnotation(field);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class DynamicTextbox : IPdfPCellEvent
+    {
+        private string fieldname;
+
+        public DynamicTextbox(string name)
+        {
+            fieldname = name;
+        }
+
+        public void CellLayout(PdfPCell cell, Rectangle rectangle, PdfContentByte[] canvases)
+        {
+            PdfWriter writer = canvases[0].PdfWriter;
+            TextField text = new TextField(writer, rectangle, fieldname);
+            //Microsoft.SharePoint.WebControls.TextField text = new TextField(writer, rectangle, fieldname);
+            PdfFormField field = text.GetTextField();
+            writer.AddAnnotation(field);
+        }
+    }
+
+
+    #region -- Using --
+       /*
+    PdfPCell cellNotesMultilineTextBox = new PdfPCell()
+    {
+        CellEvent = new DynamicTextbox("multilineTextboxNotes"),
+        Phrase = new Phrase("I will be darned like a sock. I will be darned like a sock")
+    };
+    //tblMultilineTextAreas.AddCell(cellNotesMultilineTextBox);
+    table0.AddCell(cellNotesMultilineTextBox);
+
+                        Phrase blankPhrase = new Phrase();
+    PdfPCell blankCell = new PdfPCell(blankPhrase);
+    blankCell.BorderWidth = 0;
+                        //tblMultilineTextAreas.AddCell(blankCell);
+                        table0.AddCell(blankCell);
+
+                        PdfPCell cellAccountCodesMultilineTextBox = new PdfPCell()
+                        {
+                            CellEvent = new DynamicTextbox("multilineTextboxAccountCodes"),
+                            Phrase = new Phrase("I will be dammed like a reservoir")
+                        };
+    //tblMultilineTextAreas.AddCell(cellAccountCodesMultilineTextBox);
+    table0.AddCell(cellAccountCodesMultilineTextBox);
+
+                        Phrase blankPhrase2 = new Phrase();
+    PdfPCell blankCell2 = new PdfPCell(blankPhrase2);
+    blankCell2.BorderWidth = 0;
+                        //tblMultilineTextAreas.AddCell(blankCell2);
+                        table0.AddCell(blankCell2);
+
+                        PdfPCell cell1099TaxReportableMultilineTextBox = new PdfPCell()
+                        {
+                            CellEvent = new DynamicTextbox("multilineTextbox1099TaxReportable"),
+                            Phrase = new Phrase("I will be the uncle of a monkey")
+                        };
+    //tblMultilineTextAreas.AddCell(cell1099TaxReportableMultilineTextBox);
+    table0.AddCell(cell1099TaxReportableMultilineTextBox);
+        */
+    #endregion
+    #endregion
 }
