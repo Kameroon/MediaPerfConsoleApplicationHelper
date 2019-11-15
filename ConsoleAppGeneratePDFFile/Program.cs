@@ -15,6 +15,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml;
 using System.Xml.Linq;
 using Tools;
 
@@ -57,17 +58,32 @@ namespace ConsoleAppGeneratePDFFile
 
         #endregion
 
+        private static bool Process00(DataTable dateTable, string pdfPath)
+        {
+            Stopwatch stopwatch = new Stopwatch();
+
+            for (int i = 0; i < 2; i++)
+            {
+                stopwatch.Start();
+
+                Console.WriteLine("" + i.ToString());
+                PDFManagerV1.CreatePDF(dateTable, pdfPath);
+
+                stopwatch.Stop();
+                TimeSpan stopwatchElapsed = stopwatch.Elapsed;
+                Console.WriteLine("\r\n Temps mis pour : \r\n - Récupération des de la selection \r\n - La génération du PDF \r\n - L'envoi de celui-ci par mail : " + Convert.ToInt32(stopwatchElapsed.TotalMilliseconds));
+
+            }
+
+            return true;
+        }
+
+
+        private static object _lockObj = new object();
+
         static void Main(string[] args)
         {
-            //XMLData();
-
-            #region -- HIDE ---
-            #region -- ************** XML **************  --
-            //GetEmployesXml();
-            #endregion
-
-            ////GetData();
-            ;
+            //ManageXMLFile();
 
             #region --   --
             var authors = GetAuthors();
@@ -76,8 +92,38 @@ namespace ConsoleAppGeneratePDFFile
             var dateTable = DataTableHelper.ToDataTable<Author>(authors);
 
 
-            DoWork(dateTable);
+            //DoWork(dateTable);
             #endregion
+
+            bool res = false;
+
+            Task currentThread = new Task(() =>
+            {
+                Parallel.ForEach(authors, (action) =>
+                {
+                    //res = Process00(dateTable, pdfPath);
+                    lock (_lockObj)
+                    {
+                        res = Process00(dateTable, pdfPath);
+                    }
+                });
+            });
+
+            currentThread.Start();
+            currentThread.Wait();
+
+           
+
+            //XMLData();
+            ;
+            #region -- HIDE ---
+            #region -- ************** XML **************  --
+            //GetEmployesXml();
+            #endregion
+
+            ////GetData();
+            ;
+
 
             #endregion
 
@@ -393,6 +439,158 @@ namespace ConsoleAppGeneratePDFFile
         }
         #endregion
 
+        #region -- ************************************** --
+        private static void ManageXMLFile()
+        {
+            #region -- ********************************************* --
+            XElement xEl = XElement.Load("..\\..\\Product.xml");
+            var values = from page in xEl.Elements("Product")
+                         select page.Element("Dp").Value;
+
+            IEnumerable<XElement> accounts = xEl.Elements("Product");
+            foreach (XElement item in accounts)
+            {
+                var v = item.Element("Dp").Value;
+                var d = item.Element("Dp").Name;
+                var e = item.Name;
+                var a = item.Value;
+                var i = item.NextNode;
+                var o = item.LastNode;
+                var u = item.DescendantNodes();
+                var x = item.DescendantNodesAndSelf();
+                var n = item.Descendants();
+                var m = item.Attributes();
+
+                foreach (var it in item.DescendantNodes())
+                {
+
+                }
+
+                foreach (var it in item.Descendants())
+                {
+
+                }
+
+                
+            }
+            //var xmlNodes = xEl.SelectNodes("Users/Account/User");
+
+            //foreach (XmlNode node in xmlNodes)
+            //{
+            //    Console.WriteLine("Username: {0}; Password: {1}; Active:{2}; Account: {3}; Details Account: {4}",
+            //                              node["Username"].InnerText,
+            //                              node["Password"].InnerText,
+            //                              node["Active"].InnerText,
+            //                              node["Account"].InnerText,
+            //                              node["Details"].InnerText);
+            //}
+
+            string t = "ByPhone";
+            var val = from page in xEl.Elements("Product")
+                    //where page.Element("Dp").Name == t
+                      select page.Element("Dp").Name;
+
+
+            string street = "7A Cox Street";
+            var prods = from phoneno in xEl.Elements("Product")
+                        //where phoneno.Element("Dp").Value == "ByMmail"
+                        select new
+                        {                             
+                               Dp = phoneno.Element("Dp")
+                        };
+
+            IEnumerable<XElement> produits = xEl.Elements();
+            Console.WriteLine("List of all Employee Names along with their ID:");
+            foreach (var produit in produits)
+            {
+                //Console.WriteLine("{0} ",
+                //    produit.Element("Product").Value);
+                //produit.Element("Street").Value,
+                //produit.Element("Zip").Value,
+                //produit.Element("Country").Value,
+                //produit.Element("City").Value);
+            }
+
+            var products = from phoneno in xEl.Elements("Product")
+                            //where (string)phoneno.Element("Street").Attribute("Type") == "Home"
+                            select phoneno;
+            Console.WriteLine("List products Nos....");
+            foreach (XElement xEle in products)
+            {
+                Console.WriteLine(xEle.Element("Street").Value);
+            }
+
+
+            XElement xElement = XElement.Load("..\\..\\Employees.xml");
+            var homePhone = from phoneno in xElement.Elements("Employee")
+                            where (string)phoneno.Element("Phone").Attribute("Type") == "Home"
+                            select phoneno;
+            Console.WriteLine("List HomePhone Nos.");
+            foreach (XElement xEle in homePhone)
+            {
+                Console.WriteLine(xEle.Element("Phone").Value);
+            }
+
+            IEnumerable<XElement> employees = xElement.Elements();
+            Console.WriteLine("List of all Employee Names along with their ID:");
+            foreach (var employee in employees)
+            {
+                Console.WriteLine("{0} has Employee ID {1}",
+                employee.Element("Name").Value,
+                employee.Element("EmpId").Value);
+            }
+            #endregion
+
+            #region -- ************************************* --
+            //File.WriteAllText("Test.xml", @"<Root>  
+            //                    <Child1>1</Child1>  
+            //                    <Child2>2</Child2>  
+            //                    <Child3>3</Child3>  
+            //                </Root>");
+
+            //Console.WriteLine("Querying tree loaded with XDocument.Load");
+            //Console.WriteLine("-----------------------------------------");
+            //XDocument doc = XDocument.Load("Test.xml");
+            //IEnumerable<XElement> childList =
+            //    from el in doc.Elements()
+            //    select el;
+            //foreach (XElement e in childList)
+            //    Console.WriteLine(e);
+            #endregion
+
+            XElement xelement = XElement.Load("..\\..\\Product.xml");
+            string xmlPath = @"C:\Users\Sweet Family\source\repos\ConsoleAppGeneratePDFFile\Contacts.xml";
+            XmlDocument xmldoc = new XmlDocument();
+            xmldoc.Load(xmlPath);  // use the .Load() method - not .LoadXml() !!
+
+            // get a list of all <Contact> nodes
+            XmlNodeList listOfContacts = xmldoc.SelectNodes("/Contacts/Contact");
+
+            // iterate over the <Contact> nodes
+            foreach (XmlNode singleContact in listOfContacts)
+            {
+                // get the Profiles/Personal subnode
+                XmlNode personalNode = singleContact.SelectSingleNode("Profiles/Personal");
+
+                // get the values from the <Personal> node
+                if (personalNode != null)
+                {
+                    string firstName = personalNode.SelectSingleNode("FirstName").InnerText;
+                    string lastName = personalNode.SelectSingleNode("LastName").InnerText;
+                }
+
+                // get the <Email> nodes
+                XmlNodeList emailNodes = singleContact.SelectNodes("Emails/Email");
+
+                foreach (XmlNode emailNode in emailNodes)
+                {
+                    string emailTyp = emailNode.SelectSingleNode("EmailType").InnerText;
+                    string emailAddress = emailNode.SelectSingleNode("Address").InnerText;
+                }
+            }
+        }
+        #endregion
+
         #region -- SAVE --
         private static PdfPCell GetCell(string text)
         {
@@ -695,7 +893,7 @@ namespace ConsoleAppGeneratePDFFile
                 document = MigraDoc.DocumentObjectModel.IO.DdlReader.DocumentFromFile("MigraDoc.mdddl");
 #endif
 
-                // Create a renderer for PDF that uses Unicode font encoding
+                // Create a renderer for PDF that uses Unicode font12Bold encoding
                 PdfDocumentRenderer pdfRenderer = new PdfDocumentRenderer(true);
 
                 // Set the MigraDoc document
@@ -852,6 +1050,76 @@ namespace ConsoleAppGeneratePDFFile
             authorList.Add(new Author("Mahesh Chand",
                 35,
                 "Graphics Programming with GDI+",
+                true,
+                date));
+            authorList.Add(new Author("Raj Kumar",
+              30,
+              "Building Creative Systems",
+              false,
+              date));
+            authorList.Add(new Author("Neel Beniwal",
+               18,
+               "Graphics Development with C#",
+               false,
+               date));
+            authorList.Add(new Author("Praveen Kumar",
+                28,
+                "Mastering WCF",
+                true,
+                date));
+            authorList.Add(new Author("Mahesh Chand",
+                35,
+                "A Prorammer's Guide to ADO.NET",
+                true,
+                date));
+            authorList.Add(new Author("Neel Beniwal",
+                18,
+                "Graphics Development with C#",
+                false,
+                date));
+            authorList.Add(new Author("Praveen Kumar",
+                28,
+                "Mastering WCF",
+                true,
+                date));
+            authorList.Add(new Author("Mahesh Chand",
+               35,
+               "Graphics Programming with GDI+",
+               true,
+               date));
+            authorList.Add(new Author("Mahesh Chand",
+               35,
+               "A Prorammer's Guide to ADO.NET",
+               true,
+               date));
+            authorList.Add(new Author("Neel Beniwal",
+                18,
+                "Graphics Development with C#",
+                false,
+                date));
+            authorList.Add(new Author("Praveen Kumar",
+                28,
+                "Mastering WCF",
+                true,
+                date));
+            authorList.Add(new Author("Mahesh Chand",
+                35,
+                "Graphics Programming with GDI+",
+                true,
+                date));
+            authorList.Add(new Author("Raj Kumar",
+                30,
+                "Building Creative Systems",
+                false,
+                date));
+            authorList.Add(new Author("Neel Beniwal",
+               18,
+               "Graphics Development with C#",
+               false,
+               date));
+            authorList.Add(new Author("Praveen Kumar",
+                28,
+                "Mastering WCF",
                 true,
                 date));
             authorList.Add(new Author("Raj Kumar",
@@ -1067,17 +1335,36 @@ namespace ConsoleAppGeneratePDFFile
 
 
         #region -- XML --
+
+        private static XElement GetElement(XDocument doc, string elementName)
+        {
+            foreach (XNode node in doc.DescendantNodes())
+            {
+                if (node is XElement)
+                {
+                    XElement element = (XElement)node;
+                    if (element.Name.LocalName.Equals(elementName))
+                        return element;
+                }
+            }
+            return null;
+        }
+
         public static void GetEmployesXml()
         {           
             XElement xelement = XElement.Load("..\\..\\Employees.xml");
             var employees = from nm in xelement.Elements("Employee")
                                  select nm;
 
+
+            //var data = GetElement();
+
             //var emplDataTable = XmlParser.BuildDataTableFromXml("My_Table", "xelement");
 
             var employeeFemale = from nm in xelement.Elements("Employee")
                        where (string)nm.Element("Sex") == "Female"
                        select nm;
+
             Console.WriteLine("Details of Female Employees:");
             foreach (XElement xEle in employeeFemale)
                 Console.WriteLine(xEle);
@@ -1167,7 +1454,13 @@ namespace ConsoleAppGeneratePDFFile
                         #region -- Simulation Dynamic table --
                         PdfPTable table0 = new PdfPTable(4);
 
-                        var font = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD);
+                        var font12Bold = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.BOLD);
+                        var font11Bold = new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.BOLD);
+                        var font10Bold = new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD);
+
+                        var font12Normal = new Font(Font.FontFamily.TIMES_ROMAN, 12, Font.NORMAL);
+                        var font11Normal = new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.NORMAL);
+                        var font10Normal = new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL);
 
                         #region -- Table Header --
                         PdfPCell cell0 = new PdfPCell(new Phrase("No"));
@@ -1212,7 +1505,7 @@ namespace ConsoleAppGeneratePDFFile
                         table0.AddCell("Col 3 Row 2");
                         table0.AddCell("Col 4 Row 2");
 
-                        PdfPCell cell1 = new PdfPCell(new Phrase("First total row", font));
+                        PdfPCell cell1 = new PdfPCell(new Phrase("First total row", font12Bold));
                         cell1.Colspan = 2;
                         cell1.HorizontalAlignment = 2; //0=Left, 1=Centre, 2=Right
                         table0.AddCell(cell1);
@@ -1220,7 +1513,7 @@ namespace ConsoleAppGeneratePDFFile
                         table0.AddCell("Col 3 Row 4");
                         table0.AddCell("Col 4 Row 4");
                         
-                        cell1 = new PdfPCell(new Phrase("Second total row", font));
+                        cell1 = new PdfPCell(new Phrase("Second total row", font12Bold));
                         cell1.Colspan = 2;
                         cell1.HorizontalAlignment = 2; //0=Left, 1=Centre, 2=Right
                         table0.AddCell(cell1);
@@ -1230,7 +1523,7 @@ namespace ConsoleAppGeneratePDFFile
                         #endregion
 
                         #region -- Second table group --
-                        PdfPCell productCell = new PdfPCell(new Phrase("Actishef\n   SubTitle", font));
+                        PdfPCell productCell = new PdfPCell(new Phrase("Actishef\n   SubTitle", font12Bold));
                         //productCell = new PdfPCell(new Phrase("Actishef"));
                         productCell.Colspan = 4;
                         productCell.MinimumHeight = 23;
@@ -1323,7 +1616,7 @@ namespace ConsoleAppGeneratePDFFile
                         table0.AddCell("Col 3 Row 7");
                         table0.AddCell("Col 4 Row 7");
 
-                        PdfPCell cell3 = new PdfPCell(new Phrase("First total row", font));
+                        PdfPCell cell3 = new PdfPCell(new Phrase("First total row", font12Bold));
                         cell3.Colspan = 2;
                         cell3.HorizontalAlignment = 2; //0=Left, 1=Centre, 2=Right
                         table0.AddCell(cell3);
@@ -1331,7 +1624,7 @@ namespace ConsoleAppGeneratePDFFile
                         table0.AddCell("Col 3 Row 4");
                         table0.AddCell("Col 4 Row 4");
 
-                        cell3 = new PdfPCell(new Phrase("Static headline" + Chunk.NEWLINE + "richTextBox1.Text", font));
+                        cell3 = new PdfPCell(new Phrase("Static headline" + Chunk.NEWLINE + "richTextBox1.Text", font12Bold));
                         cell3.Colspan = 2;
                         cell3.HorizontalAlignment = 2; //0=Left, 1=Centre, 2=Right
                         table0.AddCell(cell3);

@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<produits>
+  <TypeProduit Nom="Affi">
+      <Produit Nom="Actishelf">
+        <Dp Nom="Standard">
+          <details>
+            <Idcmp>10438</Idcmp>
+            <Campagne>AS LA TISANIÈRE BIO</Campagne>
+            <DateDebut>14/01/2019</DateDebut>
+            <DateFin>04/03/2019</DateFin>
+            <MontantRdvcHT>8.00</MontantRdvcHT>
+          </details>
+          <details>
+            <Idcmp>10669</Idcmp>
+            <Campagne>AS HARIBO MAOAM</Campagne>
+            <DateDebut>04/03/2019</DateDebut>
+            <DateFin>01/04/2019</DateFin>
+            <MontantRdvcHT>8.00</MontantRdvcHT>
+          </details>
+          <details>
+            <Idcmp>10805</Idcmp>
+            <Campagne>VS POULAIN TABLETTE DE CHOCOLAT</Campagne>
+            <DateDebut>29/04/2019</DateDebut>
+            <DateFin>27/05/2019</DateFin>
+            <MontantRdvcHT>9.00</MontantRdvcHT>
+          </details>
+          <details>
+            <Idcmp>10630</Idcmp>
+            <Campagne>KAK SOJASUN STEAK </Campagne>
+            <DateDebut>29/04/2019</DateDebut>
+            <DateFin>27/05/2019</DateFin>
+            <MontantRdvcHT>11.00</MontantRdvcHT>
+          </details>
+        </Dp>
+      </Produit>
+      <Produit Nom="Visishelf">
+        <Dp Nom="By Actishelf">
+          <details>
+            <Idcmp>10709</Idcmp>
+            <Campagne>VS YAOURTS DANONINO BIO</Campagne>
+            <DateDebut>29/04/2019</DateDebut>
+            <DateFin>27/05/2019</DateFin>
+            <MontantRdvcHT>8.00</MontantRdvcHT>
+          </details>
+        </Dp>
+        <Dp Nom="Kakémono By Actishelf ">
+          <details>
+            <Idcmp>10875</Idcmp>
+            <Campagne>VS POULAIN TABLETTE DE CHOCOLAT</Campagne>
+            <DateDebut>29/04/2019</DateDebut>
+            <DateFin>27/05/2019</DateFin>
+            <MontantRdvcHT>8.00</MontantRdvcHT>
+          </details>
+          <details>
+            <Idcmp>10630</Idcmp>
+            <Campagne>KAK SOJASUN STEAK </Campagne>
+            <DateDebut>29/04/2019</DateDebut>
+            <DateFin>27/05/2019</DateFin>
+            <MontantRdvcHT>8.00</MontantRdvcHT>
+          </details>
+        </Dp>
+      </Produit>
+  </TypeProduit>
+
+  <TypeProduit Nom="Acti">
+      <Produit Nom="Visishelf">
+        <Dp Nom="By Actishelf">
+          <details>
+            <Idcmp>10709</Idcmp>
+            <Campagne>VS YAOURTS DANONINO BIO</Campagne>
+            <DateDebut>29/04/2019</DateDebut>
+            <DateFin>27/05/2019</DateFin>
+            <MontantRdvcHT>8.00</MontantRdvcHT>
+          </details>
+          <details>
+            <Idcmp>10870</Idcmp>
+            <Campagne>VS POULAIN TABLETTE DE CHOCOLAT</Campagne>
+            <DateDebut>20/04/2019</DateDebut>
+            <DateFin>27/05/2019</DateFin>
+            <MontantRdvcHT>13.00</MontantRdvcHT>
+          </details>
+          <details>
+            <Idcmp>10630</Idcmp>
+            <Campagne>KAK SOJASUN STEAK </Campagne>
+            <DateDebut>30/04/2019</DateDebut>
+            <DateFin>27/05/2019</DateFin>
+            <MontantRdvcHT>18.00</MontantRdvcHT>
+          </details>
+        </Dp>
+        <Dp Nom="Kakémono By Actishelf ">
+          <details>
+            <Idcmp>10875</Idcmp>
+            <Campagne>VS POULAIN TABLETTE DE CHOCOLAT</Campagne>
+            <DateDebut>29/04/2019</DateDebut>
+            <DateFin>27/05/2019</DateFin>
+            <MontantRdvcHT>8.00</MontantRdvcHT>
+          </details>
+          <details>
+            <Idcmp>10630</Idcmp>
+            <Campagne>KAK SOJASUN STEAK </Campagne>
+            <DateDebut>29/04/2019</DateDebut>
+            <DateFin>27/05/2019</DateFin>
+            <MontantRdvcHT>8.00</MontantRdvcHT>
+          </details>
+        </Dp>
+      </Produit>
+  </TypeProduit>
+</produits>

@@ -65,6 +65,7 @@
   <ItemGroup>
     <Content Include="CustomEmployee.xml" />
     <Content Include="Employees.xml" />
+    <Content Include="produits.xml" />
     <Content Include="report.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

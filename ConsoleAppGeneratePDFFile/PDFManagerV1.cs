@@ -353,7 +353,7 @@ namespace ConsoleAppGeneratePDFFile
                         fileStream.Close();
 
                         #region Display PDF
-                        Process.Start(path);
+                        //Process.Start(path);
                         #endregion
                     }
                 }

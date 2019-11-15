@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Products>
+  <Product Name="Actishelf">
+    <Dp Name="ByPhone">
+      <details>
+        <Street>7A Cox Street</Street>
+        <City>Acampo</City>
+        <State>CA</State>
+        <Zip>95220</Zip>
+        <Country>USA</Country>
+      </details>      
+    </Dp>
+    <Dp Name="ByMmail">
+      <details>
+        <Street>7A Cox Street</Street>
+        <City>Acampo</City>
+        <State>CA</State>
+        <Zip>95220</Zip>
+        <Country>USA</Country>
+      </details>
+    </Dp>
+    <Dp Name="ByPost">
+      <details>
+        <Street>7A Cox Street</Street>
+        <City>Acampo</City>
+        <State>CA</State>
+        <Zip>95220</Zip>
+        <Country>USA</Country>
+      </details>
+    </Dp>
+  </Product>
+  <Product Name="Visishelf">
+    <Dp Name="ByPhone">
+      <details>
+        <Street>7A Cox Street</Street>
+        <City>Acampo</City>
+        <State>CA</State>
+        <Zip>95220</Zip>
+        <Country>USA</Country>
+      </details>
+    </Dp>
+    <Dp Name="ByMail">
+      <details>
+        <Street>7A Cox Street</Street>
+        <City>Acampo</City>
+        <State>CA</State>
+        <Zip>95220</Zip>
+        <Country>USA</Country>
+      </details>
+    </Dp>
+    <Dp Name="ByPost">
+      <details>
+        <Street>7A Cox Street</Street>
+        <City>Acampo</City>
+        <State>CA</State>
+        <Zip>95220</Zip>
+        <Country>USA</Country>
+      </details>
+    </Dp>
+    <Dp Name="ByMail">
+      <details>
+        <Street>7A Cox Street</Street>
+        <City>Acampo</City>
+        <State>CA</State>
+        <Zip>95220</Zip>
+        <Country>USA</Country>
+      </details>
+    </Dp>
+    <Dp Name="ByPost">
+      <details>
+        <Street>7A Cox Street</Street>
+        <City>Acampo</City>
+        <State>CA</State>
+        <Zip>95220</Zip>
+        <Country>USA</Country>
+      </details>
+    </Dp>
+  </Product>
+  <Product Name="Auther">
+    <Dp Name="ByPhone">
+      <details>
+        <Street>7A Cox Street</Street>
+        <City>Acampo</City>
+        <State>CA</State>
+        <Zip>95220</Zip>
+        <Country>USA</Country>
+      </details>
+    </Dp>
+    <Dp Name="By mail">
+      <details>
+        <Street>7A Cox Street</Street>
+        <City>Acampo</City>
+        <State>CA</State>
+        <Zip>95220</Zip>
+        <Country>USA</Country>
+      </details>
+    </Dp>
+    <Dp Name="ByPost">
+      <details>
+        <Street>7A Cox Street</Street>
+        <City>Acampo</City>
+        <State>CA</State>
+        <Zip>95220</Zip>
+        <Country>USA</Country>
+      </details>
+    </Dp>
+  </Product>
+</Products>

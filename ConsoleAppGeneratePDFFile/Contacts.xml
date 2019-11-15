@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<Contacts>
+  - <Contact>
+    <ID>xxx</ID>
+    <AutoUpdateEnabled>false</AutoUpdateEnabled>
+    <LastChanged>2013-05-29T01:53:59.4470000Z</LastChanged>
+    - <Profiles>
+      - <Personal>
+        <FirstName>My First Name</FirstName>
+        <LastName>My Last Name</LastName>
+        <UniqueName>My Unique Name</UniqueName>
+        <SortName></SortName>
+        <DisplayName>My Display Name</DisplayName>
+      </Personal>
+    </Profiles>
+    - <Phones>
+      - <Phone>
+        <ID>3</ID>
+        <PhoneType>Mobile</PhoneType>
+        <Number>000-0000000</Number>
+        <IsIMEnabled>false</IsIMEnabled>
+        <IsDefault>false</IsDefault>
+      </Phone>
+    </Phones>
+    - <Locations>
+      - <Location>
+        <ID>2</ID>
+        <LocationType>Business</LocationType>
+        <CompanyName></CompanyName>
+        <IsDefault>false</IsDefault>
+      </Location>
+    </Locations>
+  </Contact>
+  - <Contact>
+    <ID>xxx</ID>
+    <AutoUpdateEnabled>false</AutoUpdateEnabled>
+    <LastChanged>2013-05-29T01:53:25.2670000Z</LastChanged>
+    - <Profiles>
+      - <Personal>
+        <FirstName>Person</FirstName>
+        <LastName>Two</LastName>
+        <UniqueName></UniqueName>
+        <SortName></SortName>
+        <DisplayName>Person Two</DisplayName>
+      </Personal>
+    </Profiles>
+    - <Emails>
+      - <Email>
+        <ID>1</ID>
+        <EmailType>Personal</EmailType>
+        <Address>MyTest@gmail.com</Address>
+        <IsIMEnabled>false</IsIMEnabled>
+        <IsDefault>true</IsDefault>
+      </Email>
+    </Emails>
+    - <Locations>
+      - <Location>
+        <ID>2</ID>
+        <LocationType>Business</LocationType>
+        <CompanyName>Testing Company</CompanyName>
+        <IsDefault>false</IsDefault>
+      </Location>
+    </Locations>
+  </Contact>
+</Contacts>

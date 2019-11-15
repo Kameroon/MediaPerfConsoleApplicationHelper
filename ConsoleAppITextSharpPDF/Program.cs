@@ -20,6 +20,10 @@ namespace ConsoleAppITextSharpPDF
         {
             //DoWork(null);
 
+           
+
+            SimulatePdfFile();
+            ;
             #region --   --
             var authors = MyDataAccess.GetAuthors();
             string pdfPath = @"C:\Users\Sweet Family\Desktop\PdfFilesPath";
@@ -46,6 +50,199 @@ namespace ConsoleAppITextSharpPDF
             Console.WriteLine("");
         }
 
+
+        #region -- Simulation XML --
+        private static void SimulatePdfFile()
+        {
+            //File to write to
+            var testFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "RedevenceBfp.pdf");
+
+            using (var fs = new FileStream(testFile, FileMode.Create, FileAccess.Write, FileShare.None))
+            {
+                var doc0 = new Document(PageSize.A4, 5f, 5f, 5f, 5f);
+                using (var doc = new Document())
+                {
+                    using (var writer = PdfWriter.GetInstance(doc, fs))
+                    {
+                        doc.Open();
+
+                        PdfPTable royaltiesTables = new PdfPTable(4);
+                        royaltiesTables.TotalWidth = 95f;
+                        float[] widths = new float[] { 12f, 60f, 20f, 20f };
+                        royaltiesTables.SetWidths(widths);
+
+                        var normalFontTenBlack = new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.NORMAL);
+                        var boldFontTenBlack = new Font(Font.FontFamily.TIMES_ROMAN, 10, Font.BOLD);
+                        var boldFontEleventBlack = new Font(Font.FontFamily.TIMES_ROMAN, 11, Font.BOLD);
+
+                        #region -- Table Header --
+                        PdfPCell cell0 = new PdfPCell(new Phrase("No"));
+                        cell0.Colspan = 0;
+                        cell0.HorizontalAlignment = Element.ALIGN_RIGHT; 
+                        cell0.VerticalAlignment = Element.ALIGN_MIDDLE;
+                        royaltiesTables.AddCell(cell0);
+
+                        cell0 = new PdfPCell(new Phrase("Campagne"));
+                        cell0.Colspan = 0;
+                        cell0.MinimumHeight = 28;
+                        cell0.VerticalAlignment = Element.ALIGN_MIDDLE;
+                        cell0.HorizontalAlignment = 0; 
+                        royaltiesTables.AddCell(cell0);
+
+                        cell0 = new PdfPCell(new Phrase("Du"));
+                        cell0.Colspan = 0;
+                        cell0.HorizontalAlignment = 1;
+                        cell0.VerticalAlignment = Element.ALIGN_MIDDLE;
+                        royaltiesTables.AddCell(cell0);
+
+                        cell0 = new PdfPCell(new Phrase("Au"));
+                        cell0.Colspan = 0;
+                        cell0.HorizontalAlignment = 1; 
+                        cell0.VerticalAlignment = Element.ALIGN_MIDDLE;
+                        royaltiesTables.AddCell(cell0);
+                        #endregion
+
+                        #region --- ************************************************* ---
+                        string path = @"C:\Users\Sweet Family\source\repos\ConsoleAppGeneratePDFFile\ConsoleAppITextSharpPDF\produits.xml";
+
+                        string dpName = "";
+                        string productName = "";
+                        double total = 0;
+                        double ssTotal = 0;
+
+                        XDocument xDocument = XDocument.Load(path);
+
+                        foreach (XElement typeProduit in xDocument.Descendants("TypeProduit"))
+                        {
+                            var _produitXML = typeProduit.Elements("Produit");
+
+                            foreach (XElement element in _produitXML)
+                            {
+                                productName = element.FirstAttribute?.Value;
+
+                                var _dpXML = element.Elements("Dp");
+
+                                foreach (XElement childEllement in _dpXML)
+                                {
+                                    dpName = childEllement.Attribute("Nom").Value;
+                                    // -- Set Product name and Dp name --
+                                    PdfPCell productCell0 = new PdfPCell(new Phrase($"{ productName }\n   { dpName }", boldFontTenBlack));
+                                    productCell0.Colspan = 4;
+                                    productCell0.MinimumHeight = 23;
+                                    productCell0.Padding = 3;
+                                    productCell0.HorizontalAlignment = 0;
+                                    royaltiesTables.AddCell(productCell0);
+
+                                    var _detailXML = childEllement.Elements("details");
+
+                                    foreach (XElement detailXML in _detailXML)
+                                    {
+                                        PdfPCell detailCell = new PdfPCell(
+                                            new Phrase((string)(detailXML.Element("Idcmp")),
+                                            normalFontTenBlack));
+                                        detailCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                                        detailCell.HorizontalAlignment = Element.ALIGN_RIGHT;
+                                        royaltiesTables.AddCell(detailCell);
+
+                                        detailCell = new PdfPCell(
+                                            new Phrase((string)(detailXML.Element("Campagne")),
+                                            normalFontTenBlack));
+                                        detailCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                                        detailCell.HorizontalAlignment = Element.ALIGN_LEFT;
+                                        royaltiesTables.AddCell(detailCell);
+
+                                        detailCell = new PdfPCell(
+                                            new Phrase((string)(detailXML.Element("DateDebut")),
+                                            normalFontTenBlack));
+                                        detailCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                                        detailCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                                        royaltiesTables.AddCell(detailCell);
+
+                                        detailCell = new PdfPCell(
+                                            new Phrase((string)(detailXML.Element("DateFin")),
+                                            normalFontTenBlack));
+                                        detailCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                                        detailCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                                        royaltiesTables.AddCell(detailCell);
+
+                                        ssTotal += double.Parse(detailXML.Element("MontantRdvcHT").Value.Replace(".", ","));
+                                    }
+
+                                    // -- Set Sous Total Name --
+                                    PdfPCell subTotalCell = new PdfPCell(new Phrase("Sous Total", boldFontEleventBlack));
+                                    subTotalCell.Colspan = 2;
+                                    subTotalCell.PaddingRight = 10;
+                                    subTotalCell.PaddingBottom = 5;
+                                    subTotalCell.HorizontalAlignment = Element.ALIGN_RIGHT;
+                                    subTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                                    royaltiesTables.AddCell(subTotalCell);
+
+                                    // -- Set Sub Total Value --
+                                    subTotalCell = new PdfPCell(new Phrase(_detailXML.Count().ToString(), boldFontEleventBlack));
+                                    subTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                                    subTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                                    royaltiesTables.AddCell(subTotalCell);
+
+                                    // -- Set Sum Montant Hors taxe details --
+                                    var ssTotalPhrase = new Phrase(ssTotal.ToString(), boldFontEleventBlack);
+                                    subTotalCell = new PdfPCell(ssTotalPhrase);
+                                    subTotalCell.BackgroundColor = BaseColor.LIGHT_GRAY;
+                                    subTotalCell.HorizontalAlignment = Element.ALIGN_CENTER;
+                                    subTotalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                                    royaltiesTables.AddCell(subTotalCell);
+                                   
+                                    total += ssTotal;
+                                }
+
+                                // -- Set Total Name --
+                                Phrase totalPhrase = new Phrase("Total", boldFontEleventBlack);
+                                PdfPCell totalCell = new PdfPCell(totalPhrase);
+                                totalCell.Colspan = 3;
+                                totalCell.PaddingRight = 10;
+                                totalCell.PaddingBottom = 5;
+                                totalCell.HorizontalAlignment = Element.ALIGN_RIGHT;
+                                totalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                                royaltiesTables.AddCell(totalCell);
+
+                                // -- Set Total Value --
+                                totalPhrase = new Phrase(total.ToString(), boldFontEleventBlack);
+                                totalCell = new PdfPCell(totalPhrase);
+                                totalCell.HorizontalAlignment = Element.ALIGN_RIGHT;
+                                totalCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                                royaltiesTables.AddCell(totalCell);
+                            }
+
+                            string productType = typeProduit.FirstAttribute?.Value;
+                            var countProductType = _produitXML.Count();
+                            // -- Set Total Name --
+                            Phrase productTypePhrase = new Phrase("Total par type produit", boldFontEleventBlack);
+                            PdfPCell productTypeCell = new PdfPCell(productTypePhrase);
+                            productTypeCell.Colspan = 3;
+                            productTypeCell.PaddingRight = 10;
+                            productTypeCell.PaddingBottom = 5;
+                            productTypeCell.HorizontalAlignment = Element.ALIGN_RIGHT;
+                            productTypeCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                            royaltiesTables.AddCell(productTypeCell);
+
+                            productTypePhrase = new Phrase(productType.ToString(), boldFontEleventBlack);
+                            productTypeCell = new PdfPCell(productTypePhrase);
+                            productTypeCell.HorizontalAlignment = Element.ALIGN_RIGHT;
+                            productTypeCell.VerticalAlignment = Element.ALIGN_MIDDLE;
+                            royaltiesTables.AddCell(productTypeCell);
+                        }                       
+
+                        doc.Add(royaltiesTables);
+
+                        #endregion
+                        
+                        doc.Close();
+
+                        Process.Start(testFile);
+                    }
+                }
+            }
+        }
+        #endregion
 
         #region --  --
 
