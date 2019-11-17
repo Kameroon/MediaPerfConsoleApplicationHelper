@@ -230,6 +230,15 @@ namespace ConsoleAppITextSharpPDF.DataAccess
         }
 
         /// <summary>
+        /// -- Create SQL Connection --
+        /// </summary>
+        /// <returns></returns>
+        private static SqlConnection CreateConnection()
+        {
+            return new SqlConnection(GetConnectionString());
+        }
+
+        /// <summary>
         /// OK
         /// </summary>
         public static object GetSingleDataObjectSyncOK()
@@ -269,5 +278,78 @@ namespace ConsoleAppITextSharpPDF.DataAccess
 
             return record;
         }
+
+
+        #region --  --
+        public static void GetAllData()
+        {
+
+            string proc = "GetAllDataObjects";
+            try
+            {
+
+                //var res = ExecuteProc(CreateConnection(), proc, null);
+
+                SelectQuery(CreateConnection(), proc);
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+        }
+        #endregion
+
+        #region -- DAPPER GENERIC --
+        private static bool ExecuteProc(SqlConnection sqlConnection,
+           string sql, List<SqlParameter> paramList = null)
+        {
+            try
+            {
+                using (SqlConnection conn = sqlConnection)
+                {
+                    DynamicParameters dp = new DynamicParameters();
+
+                    if (paramList != null)
+                        foreach (SqlParameter sp in paramList)
+                            dp.Add(sp.ParameterName, sp.SqlValue, sp.DbType);
+
+                    conn.Open();
+
+                    return conn.Execute(sql, dp, commandType: CommandType.StoredProcedure) > 0;
+                }
+            }
+            catch (Exception e)
+            {
+                //do logging
+                return false;
+            }
+        }
+
+        private static void SelectQuery(SqlConnection sqlConnection,
+          string sql, List<SqlParameter> paramList = null)
+        {
+            try
+            {
+                using (SqlConnection conn = sqlConnection)
+                {
+                    DynamicParameters dp = new DynamicParameters();
+
+                    if (paramList != null)
+                        foreach (SqlParameter sp in paramList)
+                            dp.Add(sp.ParameterName, sp.SqlValue, sp.DbType);
+                    
+                    conn.Open();
+
+                    var res = conn.Query(sql, paramList, commandType: CommandType.StoredProcedure);
+                }
+            }
+            catch (Exception e)
+            {
+                //do logging
+                //return false;
+            }
+        }
+        #endregion
     }
 }

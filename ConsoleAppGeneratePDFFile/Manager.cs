@@ -1127,10 +1127,10 @@ namespace ConsoleAppGeneratePDFFile
             fileName = string.Format(@"\{0}.pdf", fileCreationDatetime.ToString(@"yyyyMMdd") + "_" + num + "_" + fileCreationDatetime.ToString(@"HHmmss" + ".pdf"));
             string fullPdfPath = repositoryPath + fileName;
 
-            if (File.Exists(fullPdfPath))
-            {               
-                File.Delete(fullPdfPath);
-            }
+            //if (File.Exists(fullPdfPath))
+            //{               
+            //    File.Delete(fullPdfPath);
+            //}
 
             try
             {

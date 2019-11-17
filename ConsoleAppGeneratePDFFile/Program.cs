@@ -58,61 +58,246 @@ namespace ConsoleAppGeneratePDFFile
 
         #endregion
 
+        private static DataTable dataTable = null;
+        private static string pdfPath = @"C:\Users\Sweet Family\Desktop\PdfFilesPath\TestPDF";
+
+        #region --  MULTITHREADING --
+        private static void Do()
+        {
+            Process00(dataTable, pdfPath);
+        }
+
+        // https://www.codemag.com/Article/1211071/Tasks-and-Parallelism-The-New-Wave-of-Multithreading
+        // https://stackoverflow.com/questions/29847700/parallel-processing-to-create-pdfs
+        // https://docs.microsoft.com/fr-fr/dotnet/standard/threading/managed-threading-best-practices
         private static bool Process00(DataTable dateTable, string pdfPath)
         {
             Stopwatch stopwatch = new Stopwatch();
 
-            for (int i = 0; i < 2; i++)
+            for (int i = 0; i < 5; i++)
             {
                 stopwatch.Start();
 
                 Console.WriteLine("" + i.ToString());
-                PDFManagerV1.CreatePDF(dateTable, pdfPath);
+                PDFManagerV1.CreatePDF(dateTable, pdfPath, i);
 
                 stopwatch.Stop();
                 TimeSpan stopwatchElapsed = stopwatch.Elapsed;
-                Console.WriteLine("\r\n Temps mis pour : \r\n - Récupération des de la selection \r\n - La génération du PDF \r\n - L'envoi de celui-ci par mail : " + Convert.ToInt32(stopwatchElapsed.TotalMilliseconds));
-
+                Console.WriteLine("\r\n Temps mis pour : \r\n - Récupération des de la selection \r\n - La génération du PDF \r\n - L'envoi de celui-ci par mail : " +
+                    Convert.ToInt32(stopwatchElapsed.TotalMilliseconds));
             }
 
             return true;
         }
 
+        static void CreateLabOrderInvoice(string html, string invoiceNumber)
+        {
+            try
+            {
+                string strHtml = null;
+                MemoryStream memStream = new MemoryStream();
 
+                strHtml = html;
+
+                string strFileShortName = invoiceNumber + ".pdf";
+                string strFileName = @"~\Invoices\" + strFileShortName;
+                Document docWorkingDocument = new Document(PageSize.A4, 40, 40, 40, 40);
+                StringReader srdDocToString = null;
+
+                try
+                {
+                    PdfWriter pdfWrite = default(PdfWriter);
+
+                    pdfWrite = PdfWriter.GetInstance(docWorkingDocument, new FileStream(strFileName, FileMode.Create));
+                    srdDocToString = new StringReader(strHtml);
+
+                    docWorkingDocument.Open();
+
+                    Image logo = Image.GetInstance(@"~\images\Image_PPNLOGO.jpg");
+                    logo.Alignment = Image.ALIGN_RIGHT;
+
+                    docWorkingDocument.AddTitle("Lab Order Invoice");
+                    docWorkingDocument.Add(logo);
+
+                    //XMLWorkerHelper.GetInstance().ParseXHtml(pdfWrite, docWorkingDocument, srdDocToString);
+                }
+                catch (System.Exception ex)
+                {
+                    throw ex;
+                }
+                finally
+                {
+                    if ((docWorkingDocument != null))
+                    {
+                        docWorkingDocument.Close();
+                    }
+                    if ((srdDocToString != null))
+                    {
+                        srdDocToString.Close();
+                        srdDocToString.Dispose();
+                    }
+                }
+            }
+            catch (System.Exception ex)
+            {
+                throw ex;
+            }
+        }
+
+        /// <summary>
+        /// --  --
+        /// </summary>
+        private static void CREATEPDFFROMHTML()
+        {
+            Task task = new Task(() =>
+            {
+                //Parallel.ForEach(orders, currentOrder =>
+                //{
+                //    LiveTrainingEntities db = new LiveTrainingEntities();
+                //    var trans = db.Transactions.SingleOrDefault(x => x.fTransactionID == currentOrder.TransactionID);
+
+                //    if (trans != null)
+                //    {
+                //        var labOrderInvoices = GetLabOrderInvoices(trans.Practices.fPracticeID, currentOrder.TaxInvoiceNumber);
+                //        CreateLabOrderInvoice(PopulateHTML(labOrderInvoices), currentOrder.TaxInvoiceNumber);
+
+                //        Console.WriteLine("Processing {0} on thread {1}", currentOrder.TaxInvoiceNumber,
+                //                    Thread.CurrentThread.ManagedThreadId);
+
+                //        //orders.Remove(currentOrder);
+                //    }
+                //});
+            });
+            task.Start();
+            task.Wait();
+        }
+
+        public static Byte[] PdfSharpConvert(String html)
+        {
+            Byte[] res = null;
+            using (MemoryStream ms = new MemoryStream())
+            {
+                //var pdf = TheArtOfDev.HtmlRenderer.PdfSharp.PdfGenerator.GeneratePdf(html, PdfSharp.PageSize.A4);
+                //pdf.Save(ms);
+                res = ms.ToArray();
+            }
+            return res;
+        }
+
+        private void btnExportPdf_Click(object sender, EventArgs e)
+        {
+            //Table start.
+            string html = "<table cellpadding='5' cellspacing='0' style='border: 1px solid #ccc;font-size: 9pt'>";
+
+            ////Adding HeaderRow.
+            html += "<tr>";
+            //foreach (DataGridViewColumn column in dataGridView1.Columns)
+            //{
+            //    html += "<th style='background-color: #B8DBFD;border: 1px solid #ccc'>" + column.HeaderText + "</th>";
+            //}
+            html += "</tr>";
+
+            ////Adding DataRow.
+            //foreach (DataGridViewRow row in dataGridView1.Rows)
+            //{
+            //    html += "<tr>";
+            //    foreach (DataGridViewCell cell in row.Cells)
+            //    {
+            //        html += "<td style='width:120px;border: 1px solid #ccc'>" + cell.Value.ToString() + "</td>";
+            //    }
+            //    html += "</tr>";
+            //}
+
+            //Table end.
+            html += "</table>";
+
+            //Creating Folder for saving PDF.
+            string folderPath = "C:\\PDFs\\";
+            if (!Directory.Exists(folderPath))
+            {
+                Directory.CreateDirectory(folderPath);
+            }
+
+            //Exporting HTML to PDF file.
+            using (FileStream stream = new FileStream(folderPath + "DataGridViewExport.pdf", FileMode.Create))
+            {
+                Document pdfDoc = new Document(PageSize.A2, 10f, 10f, 10f, 0f);
+                PdfWriter writer = PdfWriter.GetInstance(pdfDoc, stream);
+                pdfDoc.Open();
+                StringReader sr = new StringReader(html);
+                //XMLWorkerHelper.GetInstance().ParseXHtml(writer, pdfDoc, sr);
+                pdfDoc.Close();
+                stream.Close();
+            }
+        }
+        #endregion
         private static object _lockObj = new object();
 
         static void Main(string[] args)
         {
             //ManageXMLFile();
-
+            
             #region --   --
-            var authors = GetAuthors();
-            string pdfPath = @"C:\Users\Sweet Family\Desktop\PdfFilesPath";
+            var authors = GetAuthors();            
 
-            var dateTable = DataTableHelper.ToDataTable<Author>(authors);
+            dataTable = DataTableHelper.ToDataTable<Author>(authors);
 
 
-            //DoWork(dateTable);
+            //DoWork(dataTable);
+            #endregion
+            int numThreads = 2;
+
+            //Parallel.For(0, numThreads, i =>
+            //{
+            //    bool unfinished = true;
+            //    //while (unfinished == true)
+            //    //{
+            //    //    unfinished = pi.performSteps(i);
+            //    //}
+            //});
+
+            #region --- OK OK OK OK ---
+            ////Thread letgoThread = new Thread(Do);
+
+            ////// Commencer Thread (start thread).
+            ////letgoThread.Start();
+
+            ////// Dites au thread principal (voici main principal)
+            ////// Attendez que letgoThread finisse, puis continuez à fonctionner.
+            ////letgoThread.Join();            
             #endregion
 
-            bool res = false;
+            // -- Force le nbre de coeur --
+            Process.GetCurrentProcess().ProcessorAffinity = (IntPtr)3;
 
+            // -- Retrouve et affiche le nbre de processeur d'une machine--
+            var process = new System.Management.ManagementObjectSearcher("Select * from Win32_ComputerSystem").Get();
+            foreach (var item in process)
+            {
+                Console.WriteLine("Number Of Physical Processors: {0} ", item["NumberOfProcessors"]);
+            }
+
+            bool res = false;
+            Stopwatch stopwatch0 = new Stopwatch();
+            stopwatch0.Start();
             Task currentThread = new Task(() =>
             {
-                Parallel.ForEach(authors, (action) =>
+                lock (_lockObj)
                 {
-                    //res = Process00(dateTable, pdfPath);
-                    lock (_lockObj)
-                    {
-                        res = Process00(dateTable, pdfPath);
-                    }
-                });
-            });
+                    res = Process00(dataTable, pdfPath);
 
+                    Console.WriteLine("\r\n Processing {0} on thread {1}", "TaxInvoiceNumber",
+                                Thread.CurrentThread.ManagedThreadId);
+                }
+            });
+            
             currentThread.Start();
             currentThread.Wait();
 
-           
+            stopwatch0.Stop();
+            TimeSpan stopwatchElapsed = stopwatch0.Elapsed;
+            Console.WriteLine("\r\n Temps mis pour : " + Convert.ToInt32(stopwatchElapsed.TotalMilliseconds));
+
 
             //XMLData();
             ;
@@ -146,7 +331,7 @@ namespace ConsoleAppGeneratePDFFile
             {
                 new Thread(() =>
                 {
-                    //var res0 = Manager.CreatePDFV2(dateTable, pdfPath, i);
+                    //var res0 = Manager.CreatePDFV2(dataTable, pdfPath, i);
 
                 }).Start();
             }
@@ -156,17 +341,17 @@ namespace ConsoleAppGeneratePDFFile
 
             #region --- ********************************** ---
 
-            var query = from row in dateTable.AsEnumerable()
+            var query = from row in dataTable.AsEnumerable()
                         group row by row.Field<string>("Name") into grp
                         select grp;
 
-            var dataTableGroup = (from row in dateTable.AsEnumerable()
+            var dataTableGroup = (from row in dataTable.AsEnumerable()
                                   group row by row.Field<string>("Name") into grp
                                   select grp.CopyToDataTable()).ToList();
 
 
             #region -- ************* --
-            var grouped = from table in dateTable.AsEnumerable()
+            var grouped = from table in dataTable.AsEnumerable()
                           group table by new { placeCol = table["Name"] } into groupby
                           select new
                           {
@@ -193,7 +378,7 @@ namespace ConsoleAppGeneratePDFFile
             //    dtOutput.Rows.Add(item.Rows);
             //}
 
-            var query3 = (from row in dateTable.AsEnumerable()
+            var query3 = (from row in dataTable.AsEnumerable()
                           group row by row.Field<string>("Name")
                          into grp
                           select new
@@ -204,11 +389,11 @@ namespace ConsoleAppGeneratePDFFile
                           }).ToList();
 
 
-            var result = dateTable.AsEnumerable()
+            var result = dataTable.AsEnumerable()
                 .GroupBy(r => new { Col1 = r["Name"] })
                 .Select(g =>
                 {
-                    var row = dateTable.NewRow();
+                    var row = dataTable.NewRow();
 
                     row["Name"] = g.Min(r => r.Field<string>("Name"));
                     row["Age"] = g.Min(r => r.Field<int>("Age"));
@@ -263,40 +448,40 @@ namespace ConsoleAppGeneratePDFFile
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
 
-            //var res = Manager.CreatePDFV2(dateTable, pdfPath);
+            //var res = Manager.CreatePDFV2(dataTable, pdfPath);
 
-            //for (int i = 0; i < 15; i++)
-            //{
-            //    Task<int> ts = Task<int>.Run(() =>
-            //    {
-            //        var res0 = Manager.CreatePDFV2(dateTable, pdfPath, i);
+            for (int i = 0; i < 5; i++)
+            {
+                Task<bool> ts = Task<bool>.Run(() =>
+                {
+                    var res0 = Manager.CreatePDFV2(dataTable, pdfPath, i);
 
-            //        return 0;
-            //    });
+                    return res0;
+                });
 
-            //    Task.WhenAll(ts);
-            //}
+                Task.WhenAll(ts);
+            }
 
 
             stopwatch.Stop();
-            TimeSpan stopwatchElapsed = stopwatch.Elapsed;
+            //TimeSpan stopwatchElapsed = stopwatch.Elapsed;
             Console.WriteLine("TEMPS MIS pour générer un PDF SYNC " + Convert.ToInt32(stopwatchElapsed.TotalMilliseconds));
             ;
             // 141314
 
             //stopwatch.Start();
-            //Task task = CallCreatePDFFile(dateTable, pdfPath);
+            //Task task = CallCreatePDFFile(dataTable, pdfPath);
             //TimeSpan stopwatchElapsed = stopwatch.Elapsed;
             //Console.WriteLine("TEMPS MIS pour générer un PDF ASYNC " + Convert.ToInt32(stopwatchElapsed.TotalMilliseconds));
 
             //TestPDF.ManipulatePdf(pdfPath + "\\test.pdf", @"C:\Users\Sweet Family\Desktop\PdfFilesPath");
 
-            ////TestPDF.CreatePDFDocument(dateTable, pdfPath);
+            ////TestPDF.CreatePDFDocument(dataTable, pdfPath);
 
             ////CustomReports customReports = new CustomReports();
             ////customReports.CreatePDF("45555555555555555555555555");
 
-            //PDFManagerV1.CreatePDF(dateTable, pdfPath);
+            //PDFManagerV1.CreatePDF(dataTable, pdfPath);
 
             //GeneratePDF(pdfPath);
 
@@ -310,7 +495,7 @@ namespace ConsoleAppGeneratePDFFile
 
             //CreatePDF(pdfPath);
 
-            //PDFHelper.CreatePDF(dateTable, pdfPath);
+            //PDFHelper.CreatePDF(dataTable, pdfPath);
 
             #region MyRegion.
             /*
@@ -1278,7 +1463,7 @@ namespace ConsoleAppGeneratePDFFile
             task.Wait();
         }
 
-        static void CreateLabOrderInvoice(string html, string invoiceNumber)
+        static void CreateLabOrderInvoice00(string html, string invoiceNumber)
         {
             try
             {

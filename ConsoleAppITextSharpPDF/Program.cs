@@ -19,8 +19,9 @@ namespace ConsoleAppITextSharpPDF
         static void Main(string[] args)
         {
             //DoWork(null);
+            MyDataAccess.GetAllData();
 
-           
+
 
             SimulatePdfFile();
             ;
